@@ -1,0 +1,99 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+{% load static %}
+
+<title>Login</title>
+
+<style media="screen">
+  .box {
+    /* border-color: #d1d1d1; */
+    margin-top: 5rem;
+    background-color: #f0fff4;
+  }
+
+  .avatar {
+    margin-top: -70px;
+    padding-bottom: 20px;
+  }
+
+  .avatar img {
+    padding: 5px;
+    background: #fff;
+    border-radius: 50%;
+    -webkit-box-shadow: 0 2px 3px rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .1);
+    box-shadow: 0 2px 3px rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .1);
+  }
+
+  .field {
+    padding-bottom: 10px;
+  }
+
+  .fa {
+    margin-left: 5px;
+  }
+</style>
+
+
+<div class="container has-text-centered">
+  <div class="column is-4 is-offset-4">
+    <div class="box">
+      <figure class="avatar">
+        <img src="{% static 'logo.png' %}" style="height: 10em;">
+      </figure>
+
+      <form action="pageAdmin" method="post">
+        <div class="field">
+          <div class="control">
+            <input name="handle" class="input is-primary" type="text" placeholder="Your Handle" autofocus="" style="height: 3em;" id="handle">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <input name="password" class="input is-primary" type="password" placeholder="Your Password" style="height: 3em;" id="password">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox">
+            Remember me
+          </label>
+        </div>
+
+        {% csrf_token %}
+
+        <!-- <button class="button is-block is-info is-large is-fullwidth">Login <i class="fa fa-sign-in" aria-hidden="true"></i></button> -->
+        <input type="submit" name="" value="">
+      </form>
+
+
+
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  let handle = document.getElementById('handle').value;
+  let password = document.getElementById('password').value;
+
+  // function auth(){
+  //   $.ajax({
+  //     url: '/auth_user',            //self-calling
+  //     data: {
+  //       handle: handle,
+  //       password: password,
+  //       csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+  //     },
+  //     type: 'POST',
+  //     dataType: 'json',
+  //     cache: false,
+  //     complete: function(data, textStatus, jqXHR) {
+  //       location.href = "/";
+  //     }
+  //   });
+
+  }
+</script>
+
+{% endblock %}

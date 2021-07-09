@@ -1,0 +1,285 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+<title>pageAdmin</title>
+
+<style media="screen">
+  .card {
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #d1d1d1;
+    margin: .5em;
+    width: 50%;
+    min-width: 320px;
+  }
+
+  .answer-option {
+    border-radius: 5px;
+    border: 1px solid;
+    border-color: #48c774;
+    outline: none;
+    margin: .4em;
+  }
+
+  .time::placeholder {
+    text-align: center;
+  }
+
+  .time {
+    width: 50px;
+    height: 30px;
+    margin-top: -.1em;
+  }
+
+  .time_spec select {
+    height: 30px;
+    width: 85px;
+    text-align: center;
+    margin-top: -.1em;
+    padding-top: unset;
+    padding-bottom: unset;
+  }
+
+  .time_spec:not(.is-multiple) {
+    height: auto;
+  }
+
+  .mcq,
+  .qa {
+    background-color: #fffdf0;
+  }
+
+  .fa-image {
+    font-size: 1.8em;
+  }
+</style>
+
+<center id="main_container" class="anime">
+
+  <div class="card" style="background-color: #fffdf0">
+    <div class="card-content">
+      <div class="content has-text-centered">
+        <b>Exam starts at </b><br>
+
+        <div style="padding: .8em;">
+          <input class="input is-primary time" type="text" placeholder="H" id="exam_start_h"> :
+          <input class="input is-primary time" type="text" placeholder="M" id="exam_start_m">
+          &nbsp;
+          <div class="select is-primary time_spec" style="">
+            <select id="time_selection">
+              <option value="am">AM</option>
+              <option value="pm">PM</option>
+            </select>
+          </div>
+        </div>
+
+        <b>Exam duration</b> <br>
+        <div style="padding: .8em">
+          <input class="input is-primary time" type="text" placeholder="H" id="exam_duration_h"> :
+          <input class="input is-primary time" type="text" placeholder="M" id="exam_duration_m">
+        </div>
+
+      </div>
+    </div>
+  </div> <br>
+
+  <input class="input is-primary" type="text" placeholder="Title of the Exam" style="width: 50%; min-width: 300px;margin-bottom: 1em;" id="_title_">
+
+  <div class="card" id="create">
+    <div class="card-content">
+      <div class="content has-text-centered">
+        <h5>Select the type:</h5>
+
+        <button type="button" name="button" style="margin-top: 1em;" id="img_btn" onclick="add_image();">
+          <i class="fa fa-image"></i>
+          <input type="file" id="file_upload" oninput="upload_image(this);" multiple hidden>
+        </button>
+
+        <div class="select is-success" style="margin: .5em;">
+          <select id="type_selection">
+            <option value="1">MCQ</option>
+            <option value="2">Short Q/A</option>
+          </select>
+        </div>
+        <button class="button is-success" onclick="create();" style="margin: .5em;">create</button>
+        <br>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg_box" hidden class="anime">
+    <article class="message is-warning" style="width: 50%; min-width: 300px;">
+      <div class="message-header">
+        <p>Alert</p>
+        <button class="delete" aria-label="delete" onclick="delete_msg();"></button>
+      </div>
+      <div class="message-body" id="msg_content">
+      </div>
+    </article>
+  </div>
+
+  <br>
+  <button class="button is-success is-outlined anime" onclick="save();" style="margin: .5em;" id="save_btn">Done</button><br>
+</center>
+
+{% csrf_token %}
+
+<script type="text/javascript">
+  $('#save_btn').hide();
+  document.getElementById("img_btn").disabled = true;
+
+  function create() {
+    let type = $('#type_selection option:selected').val();
+    let mcq =
+      '<div class="card anime mcq"><div class="card-content"><div class="content has-text-centered"><textarea class="_mcq_ textarea is-primary  question" placeholder="Enter the question"></textarea></div><button class="button is-success" onclick="add(this);" style="font-size: 1em;margin: 1em;">Add options</button><br></div></div>'
+    let qa =
+      '<div class="card anime qa"><div class="card-content"><div class="content has-text-centered"><textarea class="_qa_ textarea is-success question" placeholder="Enter the question"></textarea><input class="input is-success answer_qa" type="text" placeholder="Enter the answer" style="width:55%;margin: 1em;" /></div></div></div>'
+    if (type == "1") { //mcq
+      $(mcq).insertBefore("#create");
+    } else { //qa
+      $(qa).insertBefore("#create");
+    }
+    $('#save_btn').show();
+    document.getElementById("img_btn").disabled = false;
+  }
+
+  function add(obj) {
+    let option = '<div class="control anime" style="margin: .5em;"><label class="checkbox"><input type="checkbox" class="radio_btn"></label><input class="answer-option" type="text" style="padding: .5em;" placeholder="Enter the option" /></div>'
+    $(option).insertBefore(obj);
+  }
+
+  function add_image() {
+    document.getElementById("file_upload").click();
+  }
+
+  function upload_image(input) {
+
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        $('<img src="'+ event.target.result +'" style="height: 15em;"> </img> <br>').insertBefore(".question:last");
+        send_img_to_server(event.target.result);
+
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+
+
+  }
+
+  function send_img_to_server(base64) {
+    $.ajax({
+      url: "upload_img",
+      type: 'POST',
+      data: {
+        base64_data: base64.slice(23),
+        csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+      },
+
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        // window.location.href = "omrs";
+        console.log(data.url);
+      },
+      error: function() {
+        console.log("Image is not uploaded, please try again")
+      }
+    });
+  }
+
+
+  function show_msg(string) {
+    document.getElementById('msg_box').hidden = false;
+    document.getElementById('msg_content').innerHTML = string;
+  }
+
+  function delete_msg() {
+    document.getElementById('msg_box').hidden = true;
+  }
+
+  function save() {
+    let json_ques = {
+      'starts': [], //starts 1st member of array is hour, 2nd is minutes
+      'ques_mcq': [],
+      'mcq': {},
+      'mcq_correct': {},
+      'ques_qa': [],
+      'qa_correct': []
+    };
+    let mcq = $('._mcq_').length;
+    let mcq_div = $('.mcq').length;
+    let qa = $('._qa_').length;
+
+
+    json_ques.starts[0] = Number(document.getElementById('exam_start_h').value); //hour
+    json_ques.starts[1] = Number(document.getElementById('exam_start_m').value); //min
+
+    let duration_h = Number(document.getElementById('exam_duration_h').value);
+    let duration_m = Number(document.getElementById('exam_duration_m').value);
+
+    json_ques.title = document.getElementById('_title_').value;
+
+    if (json_ques.starts[0] > 12 || json_ques.starts[0] < 1 || json_ques.starts[0] == NaN) {
+      show_msg("Please enter a valid hour in <b>Exam starts at H</b> field <br> (range: 1-12) only numbers!");
+      return false;
+    } else if (json_ques.starts[1] > 59 || json_ques.starts[1] < 0 || json_ques.starts[1] == NaN) {
+      show_msg("Please enter a valid minute in <b>Exam starts at M</b> field <br> (range: 0-59) only numbers!");
+      return false;
+    } else if (duration_h == NaN || duration_h < 0) {
+      show_msg("Please enter a valid hour in <b>Exam duration H</b> field");
+      return false;
+    } else if (duration_m > 59 || duration_m < 0 || duration_m == NaN) {
+      show_msg("Please enter a valid minute in <b>Exam duration M</br> field");
+      return false;
+    } else if (duration_h == 0 && duration_m == 0) {
+      show_msg("Please enter a valid duration in <b>Exam duration</br> field");
+      return false;
+    } else if (json_ques.title == "" || json_ques.title.search(/\`|\~|\!|\@|\$|\%|\^|\&|\*|\+|\||\\|\'|\>|\?|\/|\""|\;/g) != -1 || json_ques.title.replace(/ /g, '') == "") {
+      show_msg("Please Enter a Valid Title.<br>(remove special characters)");
+      return false;
+    }
+
+    json_ques['duration'] = duration_h * 60 + duration_m; //duration is mins
+
+    for (let count = 0; count < mcq; count++) {
+      json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
+    }
+    for (count = 0; count < qa; count++) {
+      json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();
+      json_ques.qa_correct[count] = $('.answer_qa:eq(' + count + ')').val();
+    }
+    for (count = 0; count < mcq_div; count++) {
+      let n_options = $('.mcq:eq(' + count + ') .radio_btn').length;
+      json_ques.mcq[count] = [];
+      json_ques.mcq_correct[count] = [];
+      let serial = 0;
+      for (let c = 0; c < n_options; c++) {
+        let mcq_options = $('.mcq:eq(' + count + ') .answer-option:eq(' + c + ')').val();
+        json_ques.mcq[count][c] = mcq_options;
+        if ($('.mcq:eq(' + count + ') .radio_btn:eq(' + c + ')').is(':checked')) {
+          json_ques.mcq_correct[count][serial] = c;
+          serial++;
+        }
+      }
+    }
+    json_ques = JSON.stringify(json_ques);
+    $.ajax({
+      url: 'write', //self-calling
+      data: {
+        json_ques: json_ques,
+        csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+      },
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      complete: function(data, textStatus, jqXHR) {
+        location.href = "/";
+      }
+    });
+  }
+</script>
+
+{% endblock %}

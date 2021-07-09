@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta http-equiv='cache-control' content='no-cache'>
+  <meta http-equiv='expires' content='0'>
+  <meta http-equiv='pragma' content='no-cache'>
+
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'bulma/bulma.min.css' %}">
+  <script src="{% static 'jquery.min.js' %}" charset="utf-8"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
+
+  <style media="screen">
+    .anime {
+      animation: fadeIn ease 2s;
+      -webkit-animation: fadeIn ease 2s;
+      -moz-animation: fadeIn ease 2s;
+      -o-animation: fadeIn ease 2s;
+      -ms-animation: fadeIn ease 2s;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @-moz-keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @-webkit-keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @-o-keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @-ms-keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    ._header_ {
+      box-shadow: 0px .2px 3px #888;
+      border-bottom-left-radius: 60%;
+      border-bottom-right-radius: 60%;
+    }
+
+    .head_btn {
+      margin-top: .9em;
+      margin-left: 5%;
+      margin-right: 5%;
+      font-size: .8em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="_header_">
+    <center>
+      <a href="/"><button class="button is-link is-light head_btn">Home</button></a>
+
+      {% load static %}
+      <img class="site-logo" src="{% static 'logo.png' %}" alt="logo" style="height:2.5em; margin:.5em;">
+
+      <a href="pageAdmin"><button class="button is-link is-light head_btn">Admin</button></a>
+    </center>
+  </div>
+  <br><br>
+
+  {% block content %}
+  {% endblock %}
+
+</body>
+
+
+</html>

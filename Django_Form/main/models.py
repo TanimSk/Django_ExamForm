@@ -1,10 +1,10 @@
 from django.db import models
 
 
-class Questions(models.Model):
-    ques_json = models.JSONField()
+class Question(models.Model):
+    json_ques = models.JSONField()
+    title = models.CharField(max_length=120)
     # starts = models.CharField(max_length=10)
     # duration = models.IntegerField()
-    # title = models.CharField(max_length=100)
-    # email = models.EmailField(max_length=200)
 
+    # email = models.EmailField(max_length=200)

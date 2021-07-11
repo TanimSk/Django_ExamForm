@@ -1,0 +1,287 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+
+<title>Forms</title>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<style media="screen">
+  body {
+    word-break: break-all;
+  }
+
+
+  .flex_box {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .cards {
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #d1d1d1;
+    margin: .5em;
+    flex: 30%;
+  }
+
+  .hover:hover {
+    transition: .2s;
+    background-color: #f0fff4;
+    cursor: pointer;
+  }
+
+  .question {
+    width: 55%;
+    min-width: 300px;
+  }
+
+  hr {
+    background-color: #caeba0;
+  }
+</style>
+
+  <center>
+    <div class="flex_box" id="container">
+
+    </div>
+
+    <div class="card question anime" id="enable" style="background-color:#f5faf0;">
+      <div class="card-content">
+        <div class="content has-text-centered" id="content">
+
+        </div>
+      </div>
+    </div>
+
+  </center>
+
+  <script type="text/javascript">
+    let kp_json;
+
+    // load_title();
+    $("#enable").hide();
+
+
+
+    var id = 0;
+    {% for cont in content %}
+      id++;
+      $('#container').append('<div class="card anime cards" id="' + id + '" onclick="show_ques(this.id);"><div class="card-content hover"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
+    {% endfor %}
+
+
+    function show_chart(y1, y2) {
+      $("center:eq(1)").append(
+        '<div style="width:55%;min-width:300px;"><canvas id="myChart"></canvas></div>'
+      );
+      var ctx = document.getElementById('myChart').getContext('2d');
+      var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Full Mark', 'Your Mark'],
+          datasets: [{
+            label: 'MCQ Marks',
+            data: [y1, y2],
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(75, 192, 192, 0.2)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function show_ques(id) {
+      let filename;
+      $.ajax({
+        url: "../assets/php/filename.json",
+        method: "get",
+        dataType: "text",
+        success: function(txt) {
+          filename = txt.split("\n")[id];
+          $.ajax({
+            url: "../assets/questions/" + filename,
+            method: "get",
+            dataType: "json",
+            success: function(json) {
+              kp_json = json;
+              $('#container').hide();
+              $("#enable").show();
+              $("#content").append("<h3>" + json.title + "</h3>");
+              for (let i = 0; i < json.ques_qa.length; i++) {
+                $("#content").append("<hr><h5 style='float:left;'> &#9654;&nbsp;" + json.ques_qa[i] + "</h5><br>");
+                $("#content").append('<input style="background-color:#fdfffa;" class="input is-primary qa_correct" type="text" placeholder="Answer the short question">');
+              }
+              for (i = 0; i < json.ques_mcq.length; i++) {
+                $("#content").append("<hr><h5 style='float:left;'> &#9654;&nbsp;" + json.ques_mcq[i] + "</h5><br>");
+                $("#content").append("<div class='mcq_holder'></div>");
+                for (let d = 0; d < json.mcq[i].length; d++) {
+                  $(".mcq_holder:eq(" + i + ")").append('<br><label class="checkbox" style="float: left;"><input class="mcq_option" type="checkbox" value="' + json.mcq[i][d] + '">&nbsp;&nbsp;' + json.mcq[i][d] + '</label><br>');
+                }
+              }
+              $("#content").append('<hr><button class="button is-primary is-outlined" onclick="submit_form();">Submit</button>');
+
+            }
+          });
+        }
+      });
+    }
+
+    function submit_form() {
+      $("#content *").attr("disabled", "disabled").off('click');
+      $("center:eq(1)").append(
+        '<br><div class="card question anime" style="background-color:#fffde8;"><div class="card-content"><div class="content has-text-centered" id="cred">Please fill up<br>\
+        <div class="field"><p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="name" class="input" type="text" placeholder="Enter your name"><span class="icon is-small is-left"><i class="fas fa-user"></i></span></p></div>\
+        <div class="field"><p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="email" class="input" type="email" placeholder="Enter your e-mail"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></p></div>\
+        <div class="field"><p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="number" class="input" type="text" placeholder="Enter your phone number"><span class="icon is-small is-left"><i class="fas fa-phone"></i></span></p></div>\
+        <button class="button is-primary is-outlined" onclick="show_result(this);">Show result</button>\
+        </div></div></div>'
+      );
+      $("center:eq(1)").append(
+        ' <div id="msg_box" hidden><br><br><article class="message is-warning" style="width: 50%; margin: auto;"><div class="message-header"><p>Alert</p><button class="delete" aria-label="delete" onclick="delete_msg();"></button></div><div class="message-body" id="msg_content"></div></article></div><div style="height: 5em;"></div><button type="button" name="button" id="bKash_button" hidden></button></div>'
+      );
+      $('html, body').animate({
+        scrollTop: $("#cred").offset().top
+      }, 200);
+    }
+
+    function validateEmail(email) {
+      const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
+    }
+
+    function show_result(t) {
+      let name = document.getElementById('name').value;
+      let email = document.getElementById('email').value;
+      let number = document.getElementById('number').value;
+      if (name == "" || email == "" || number == "") {
+        show_msg("Please fill the form properly");
+        $('html, body').animate({
+          scrollTop: $("#msg_box").offset().top
+        }, 200);
+        return false;
+      } else if (!validateEmail(email)) {
+        show_msg("Enter a valid mail");
+        $('html, body').animate({
+          scrollTop: $("#msg_box").offset().top
+        }, 200);
+        return false;
+      } else if (!(/^[0-9]*$/gm.test(number))) {
+        show_msg("Enter your phone number correctly");
+        $('html, body').animate({
+          scrollTop: $("#msg_box").offset().top
+        }, 200);
+        return false;
+      }
+
+      t.disabled = true;
+
+      show_msg("please wait <br> <progress class='progress is-small is-primary' max='100'>15%</progress>");
+      window.scrollTo(0, document.body.scrollHeight);
+      $.ajax({
+        url: "https://script.google.com/macros/s/AKfycby-RjMHA3t55IPqY9RcD3TuOqDABnBr-cw5BGkzi5qiwec97dY/exec",
+        data: {
+          "name": name,
+          "email": email,
+          "number": number
+        },
+        method: "GET",
+        dataType: "json",
+        success: function(d) {
+          $("center:eq(1)").append(
+            '<table class="table is-bordered is-striped is-narrow is-hoverable" style="width:55%;min-width:300px;">\
+                  <thead>\
+                    <tr>\
+                      <th>Question</th>\
+                      <th>Correct Answer</th>\
+                      <th>Your Answer</th>\
+                    </tr>\
+                  </thead>\
+                  <tbody id="table_body">\
+                  </tbody>\
+                </table><br>'
+          );
+
+          let qa = $('.qa_correct').length;
+          let correct_mcq = [];
+          let qa_answer;
+          for (let count = 0; count < qa; count++) {
+            qa_answer = $('.qa_correct:eq(' + count + ')').val();
+            $('#table_body').append(
+              '<tr><td>' + kp_json.ques_qa[count] + '</td>\
+              <td>' + kp_json.qa_correct[count] + '</td>\
+              <td>' + qa_answer + '</td></tr>'
+            );
+          }
+          let mcq_mark = 0;
+          let array = [];
+          let mcq_answer = [];
+          let mcq_num = 0;
+          for (count = 0; count < kp_json.ques_mcq.length; count++) {
+            mcq_num = kp_json.mcq_correct[count].length;
+            for (let cnt = 0; cnt < mcq_num; cnt++) {
+              correct_mcq.push(kp_json.mcq[Object.keys(kp_json.mcq_correct)[count]][kp_json.mcq_correct[count][cnt]]);
+            }
+            // if ($('.mcq_option:eq(' + count + ')').is(':checked'))
+            let size = $(".mcq_holder:eq(" + count + ") .mcq_option").length;
+            for (let ct = 0; ct < size; ct++) {
+              if ($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").is(':checked')) {
+                mcq_answer.push($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val());
+                array.push(ct);
+              }
+            }
+            if (array.length == 1) {
+              for (let u = 0; u < mcq_num; u++) {
+                if (kp_json.mcq_correct[count][u] == array[0]) {
+                  mcq_mark++;
+                }
+              }
+            }
+            $('#table_body').append(
+              '<tr><td>' + kp_json.ques_mcq[count] + '</td>\
+              <td>' + correct_mcq.toString() + '</td>\
+              <td>' + mcq_answer.toString() + '</td></tr>'
+            );
+            array = [];
+            mcq_answer = [];
+            correct_mcq = [];
+          }
+
+          show_chart(Object.keys(kp_json.mcq_correct).length, mcq_mark);
+          delete_msg();
+          window.scrollTo(0, document.body.scrollHeight);
+        },
+        error: function(x, y, z) {
+          alert("error please try again!");
+        }
+      });
+    }
+
+    function delete_msg() {
+      $('#msg_box').hide();
+    }
+
+    function show_msg(string) {
+      $("#msg_box").fadeIn();
+      document.getElementById('msg_content').innerHTML = string;
+    }
+  </script>
+
+{% endblock %}

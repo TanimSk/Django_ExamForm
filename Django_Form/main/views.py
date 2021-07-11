@@ -7,8 +7,12 @@ import json
 
 
 def home(req):
-    content = requests.get('http://127.0.0.1:5000/get_title')
-    return render(req, "main/home/index.html", {'content': (content.text)})
+    content = models.Question.objects.all()
+    return render(req, "main/home/index.html", {'content': content})
+
+
+def questions(req, ques_id):
+    return render(req, "main/questions/index.html")
 
 
 def page_admin(req):
@@ -36,7 +40,6 @@ def upload_img(req):
         "expiration": '172800',
     }
     url = requests.post(url, payload).json()['data']['url']
-    print(url)
 
     return HttpResponse(json.dumps({'url': url}), content_type='application/json')
 
@@ -44,5 +47,8 @@ def upload_img(req):
 def write(req):
     if req.method == 'POST':
         json_ques = req.POST.get('json_ques')
-        entry = models.Questions(json_ques=json_ques)
+        entry = models.Question(json_ques=json_ques, title=json.loads(json_ques)['title'])
         entry.save()
+        return HttpResponse("OK")
+    else:
+        return HttpResponse("ERROR!")

@@ -22,6 +22,15 @@
     margin: .4em;
   }
 
+  .numberCircle {
+    width: 2em;
+    border-radius: 5em;
+    text-align: center;
+    background-color: #00d1b2;
+    font-weight: bold;
+    margin-top: -2.3em;
+  }
+
   .time::placeholder {
     text-align: center;
   }
@@ -61,7 +70,6 @@
     <div class="card-content">
       <div class="content has-text-centered">
         <b>Exam starts at </b><br>
-
         <div style="padding: .8em;">
           <input class="input is-primary time" type="text" placeholder="H" id="exam_start_h"> :
           <input class="input is-primary time" type="text" placeholder="M" id="exam_start_m">
@@ -126,15 +134,22 @@
 {% csrf_token %}
 
 <script type="text/javascript">
+  let img_dict = {};
+  let count_ques = 0;
+  let count_img = 0;
+
   $('#save_btn').hide();
   document.getElementById("img_btn").disabled = true;
 
   function create() {
+    count_ques++;
+    count_img = 0;
+    img_dict[count_ques-1] = [];
     let type = $('#type_selection option:selected').val();
     let mcq =
-      '<div class="card anime mcq"><div class="card-content"><div class="content has-text-centered"><textarea class="_mcq_ textarea is-primary  question" placeholder="Enter the question"></textarea></div><button class="button is-success" onclick="add(this);" style="font-size: 1em;margin: 1em;">Add options</button><br></div></div>'
+      '<div class="card anime mcq"><div class="card-content"><div class="numberCircle">'+count_ques+'</div><br><div class="content has-text-centered"><textarea class="_mcq_ textarea is-primary question" placeholder="Enter the question"></textarea></div><button class="button is-success" onclick="add(this);" style="font-size: 1em;margin: 1em;">Add options</button><br></div></div><br>'
     let qa =
-      '<div class="card anime qa"><div class="card-content"><div class="content has-text-centered"><textarea class="_qa_ textarea is-success question" placeholder="Enter the question"></textarea><input class="input is-success answer_qa" type="text" placeholder="Enter the answer" style="width:55%;margin: 1em;" /></div></div></div>'
+      '<div class="card anime qa"><div class="card-content"><div class="numberCircle">'+count_ques+'</div><br><div class="content has-text-centered"><textarea class="_qa_ textarea is-success question" placeholder="Enter the question"></textarea><input class="input is-success answer_qa" type="text" placeholder="Enter the answer" style="width:55%;margin: 1em;" /></div></div></div><br>'
     if (type == "1") { //mcq
       $(mcq).insertBefore("#create");
     } else { //qa
@@ -158,7 +173,7 @@
     if (input.files && input.files[0]) {
       var reader = new FileReader();
       reader.onload = function(event) {
-        $('<img src="'+ event.target.result +'" style="height: 15em;"> </img> <br>').insertBefore(".question:last");
+        $('<img src="' + event.target.result + '" style="height: 15em;"> </img> <br>').insertBefore(".question:last");
         send_img_to_server(event.target.result);
 
       }
@@ -181,11 +196,11 @@
       dataType: 'json',
       cache: false,
       success: function(data) {
-        // window.location.href = "omrs";
-        console.log(data.url);
+        img_dict[count_ques-1][count_img] = data.url;
+        count_img++;
       },
       error: function() {
-        console.log("Image is not uploaded, please try again")
+        console.log("Image is not uploaded, please try again");
       }
     });
   }
@@ -207,8 +222,11 @@
       'mcq': {},
       'mcq_correct': {},
       'ques_qa': [],
-      'qa_correct': []
+      'qa_correct': [],
+      'images': img_dict
     };
+    console.log(json_ques);
+
     let mcq = $('._mcq_').length;
     let mcq_div = $('.mcq').length;
     let qa = $('._qa_').length;
@@ -275,8 +293,11 @@
       type: 'POST',
       dataType: 'json',
       cache: false,
-      complete: function(data, textStatus, jqXHR) {
-        location.href = "/";
+      success: function(data) {
+        //write something
+      },
+      error: function() {
+        console.log("Image is not uploaded, please try again")
       }
     });
   }

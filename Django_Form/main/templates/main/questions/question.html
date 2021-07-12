@@ -1,0 +1,184 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+<title>Forms</title>
+
+<style media="screen">
+  .card {
+    width: 55%;
+    min-width: 320px;
+  }
+
+  hr {
+    background-color: #caeba0;
+  }
+
+  #stickThis {
+    padding: 5px;
+    background-color: #ccc;
+    font-size: 1.5em;
+    width: 300px;
+    text-align: center;
+    font-weight: bold;
+    border: 2px solid #444;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+  }
+
+  #stickThis.stick {
+    margin-top: 0;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+    -webkit-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
+  }
+</style>
+
+<center class="anime">
+  <div id="stick-here"></div>
+  <div class="card" id="stickThis" style="background-color: #fffde8; width: 180px;">
+    <small style="font-size: 0.8rem;">time remaining:</small> <br>
+    <h1 style="font-size: 1.8rem;">00:00:00</h1>
+  </div>
+
+  <br>
+
+  <div class="card question" style="background-color:#f5faf0;">
+    <div class="card-content">
+      <div class="content has-text-centered" id="content">
+
+      </div>
+    </div>
+  </div>
+
+  <br><br>
+
+
+  <div class="card" style="background-color:#fffde8;">
+    <div class="card-content">
+      <div class="content has-text-centered">Please fill up<br><br>
+        <div class="field">
+          <p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="name" class="input" type="text" placeholder="Enter your name"><span class="icon is-small is-left"><i class="fa fa-user"></i></span></p>
+        </div>
+        <div class="field">
+          <p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="email" class="input" type="email" placeholder="Enter your e-mail"><span class="icon is-small is-left"><i class="fa fa-envelope"></i></span></p>
+        </div>
+        <div class="field">
+          <p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="number" class="input" type="text" placeholder="Enter your phone number"><span class="icon is-small is-left"><i class="fa fa-phone"></i></span></p>
+        </div>
+        <button class="button is-primary is-outlined" onclick="send_ans_to_server();">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg_box" hidden>
+    <br><br>
+    <article class="message is-warning" style="width: 50%; margin: auto;">
+      <div class="message-header">
+        <p>Alert</p><button class="delete" aria-label="delete" onclick="delete_msg();"></button>
+      </div>
+      <div class="message-body" id="msg_content"></div>
+    </article>
+  </div>
+
+  {% csrf_token %}
+
+</center>
+
+<script type="text/javascript">
+  let json = JSON.parse('{{ json_ques | safe}}');
+
+
+  $("#content").append("<h3>" + json.title + "</h3>");
+  for (let i = 0; i < json.ques_qa.length; i++) {
+    $("#content").append("<hr><div class='ques_div'><h5 style='float:left;'> &#9654;&nbsp;" + json.ques_qa[i] + "</h5><br>\
+    <input style=\"background-color:#fdfffa;\" class=\"input is-primary qa_correct\" type=\"text\" placeholder=\"Answer the short question\"></div>");
+    // $("#content").append('');
+  }
+  for (i = 0; i < json.ques_mcq.length; i++) {
+    $("#content").append("<hr><div class='mcq_holder ques_div'><h5 style='float:left;'> &#9654;&nbsp;" + json.ques_mcq[i] + "</h5><br></div>");
+    // $("#content").append("");
+    for (let d = 0; d < json.mcq[i].length; d++) {
+      $(".mcq_holder:eq(" + i + ")").append('<br><label class="checkbox" style="float: left;"><input class="mcq_option" type="checkbox" value="' + json.mcq[i][d] + '">&nbsp;&nbsp;' + json.mcq[i][d] + '</label><br>');
+    }
+  }
+  for (i = 0; i < Object.keys(json.images).length; i++) {
+    for (d = 0; d < json.images[i].length; d++) {
+      $(".ques_div:eq(" + i + ")").prepend('<img src="' + json.images[i][d] + '" style="padding-top: .8em;" alt="couldn\'t load the image"><hr style="opacity:0;">');
+    }
+  }
+
+
+  function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  }
+
+  function delete_msg() {
+    $('#msg_box').hide();
+  }
+
+  function show_msg(string) {
+    $("#msg_box").fadeIn();
+    document.getElementById('msg_content').innerHTML = string;
+  }
+
+  function send_ans_to_server() {
+    let name = document.getElementById('name').value;
+    let email = document.getElementById('email').value;
+    let number = document.getElementById('number').value;
+    if (name == "" || email == "" || number == "") {
+      show_msg("Please fill the form properly");
+      return false;
+    } else if ((/^[0-9]*$/gm.test(name))) {
+      show_msg("Name cannot be numeric");
+      return false;
+    } else if (!validateEmail(email)) {
+      show_msg("Enter a valid mail");
+      return false;
+    } else if (!(/^[0-9]*$/gm.test(number)) || number.length < 11) {
+      show_msg("Enter your phone number correctly");
+      return false;
+    }
+
+
+    // $.ajax({
+    //   url: '', //self-calling
+    //   data: {
+    //     name: name,
+    //     email: email,
+    //     number: number,
+    //     csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+    //   },
+    //   type: 'POST',
+    //   dataType: 'json',
+    //   cache: false,
+    //   success: function(data) {
+    //     console.log(1111111111);
+    //   },
+    //   error: function() {
+    //     console.log("Image is not uploaded, please try again");
+    //   }
+    // });
+
+  }
+
+  function sticktothetop() {
+    var window_top = $(window).scrollTop();
+    var top = $('#stick-here').offset().top;
+    if (window_top > top) {
+      $('#stickThis').addClass('stick');
+      $('#stick-here').height($('#stickThis').outerHeight());
+    } else {
+      $('#stickThis').removeClass('stick');
+      $('#stick-here').height(0);
+    }
+  }
+  $(function() {
+    $(window).scroll(sticktothetop);
+    sticktothetop();
+  });
+</script>
+
+{% endblock %}

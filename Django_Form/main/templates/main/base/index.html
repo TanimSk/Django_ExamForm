@@ -80,23 +80,37 @@
     }
 
     .head_btn {
-      margin-top: .9em;
+      margin-top: .5rem;
       margin-left: 5%;
       margin-right: 5%;
-      font-size: .8em;
     }
+
   </style>
 </head>
 
 <body>
   <div class="_header_">
     <center>
-      <a href="http://127.0.0.1:8000"><button class="button is-link is-light head_btn">Home</button></a>
+      <a href="http://127.0.0.1:8000">
+        <button class="button is-medium head_btn" style="font-size: 1.1rem; border-radius: 50%;">
+          <span class="icon is-medium">
+            <i class="fa fa-home"></i>
+          </span>
+        </button>
+
+      </a>
 
       {% load static %}
       <img class="site-logo" src="{% static 'logo.png' %}" alt="logo" style="height:2.5em; margin:.5em;">
 
-      <a href="http://127.0.0.1:8000/pageAdmin"><button class="button is-link is-light head_btn">Admin</button></a>
+      <a href="http://127.0.0.1:8000/pageAdmin">
+        <button class="button is-medium head_btn" style="font-size: 1.1rem;border-radius: 50%;">
+          <span class="icon is-medium">
+            <i class="fa fa-user"></i>
+          </span>
+        </button>
+
+      </a>
     </center>
   </div>
   <br><br>

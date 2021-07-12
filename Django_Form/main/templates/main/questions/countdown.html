@@ -1,0 +1,74 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+
+<title>Forms</title>
+
+
+<style media="screen">
+  .card {
+    width: 55%;
+    min-width: 320px;
+  }
+</style>
+
+<center>
+
+  <div class="card anime" style="background-color: #eefff3;">
+
+    <div class="card-content">
+      <div class="content has-text-centered">
+        <b>Time remaining</b>
+        <h1 id="time" style="color: #474747; font-size: 3.5em; padding: .5em;">
+
+        </h1>
+        <br><br>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg_box" hidden>
+    <br><br>
+    <article class="message is-warning" style="width: 50%; margin: auto;">
+      <div class="message-header">
+        <p>Alert</p><button class="delete" aria-label="delete" onclick="delete_msg();"></button>
+      </div>
+      <div class="message-body" id="msg_content"></div>
+    </article>
+  </div>
+
+
+</center>
+
+<script type="text/javascript">
+  function pad(num, size) {
+    num = num.toString();
+    while (num.length < size) num = "0" + num;
+    return num;
+  }
+
+  function start_countdown(h, m, s) {
+    document.getElementById('time').innerHTML = pad(h,2) + ":" + pad(m,2) + ":" + pad(s,2);
+    let count = setInterval(function() {
+      if (s == 0) {
+        s = 60;
+        m--;
+        if (m == 0) {
+          m = 59;
+          h--;
+        }
+      }
+      s--;
+      document.getElementById('time').innerHTML = pad(h,2) + ":" + pad(m,2) + ":" + pad(s,2);
+      if(h==0 && m==0 && s==0){
+        clearInterval(count);
+        window.location.href = "";
+      }
+
+    }, 1000);
+  }
+
+  start_countdown({{ time_h }}, {{ time_m }}, {{ time_s }});
+</script>
+
+{% endblock %}

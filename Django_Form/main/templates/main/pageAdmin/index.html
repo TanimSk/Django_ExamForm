@@ -76,8 +76,8 @@
           &nbsp;
           <div class="select is-primary time_spec" style="">
             <select id="time_selection">
-              <option value="am">AM</option>
-              <option value="pm">PM</option>
+              <option value="0">AM</option>
+              <option value="1">PM</option>
             </select>
           </div>
         </div>
@@ -240,16 +240,16 @@
 
     json_ques.title = document.getElementById('_title_').value;
 
-    if (json_ques.starts[0] > 12 || json_ques.starts[0] < 1 || json_ques.starts[0] == NaN) {
+    if (isNaN(json_ques.starts[0]) || json_ques.starts[0] > 12 || json_ques.starts[0] < 1) {
       show_msg("Please enter a valid hour in <b>Exam starts at H</b> field <br> (range: 1-12) only numbers!");
       return false;
-    } else if (json_ques.starts[1] > 59 || json_ques.starts[1] < 0 || json_ques.starts[1] == NaN) {
+    } else if (isNaN(json_ques.starts[1]) || json_ques.starts[1] > 59 || json_ques.starts[1] < 0) {
       show_msg("Please enter a valid minute in <b>Exam starts at M</b> field <br> (range: 0-59) only numbers!");
       return false;
-    } else if (duration_h == NaN || duration_h < 0) {
+    } else if (isNaN(duration_h) || duration_h < 0) {
       show_msg("Please enter a valid hour in <b>Exam duration H</b> field");
       return false;
-    } else if (duration_m > 59 || duration_m < 0 || duration_m == NaN) {
+    } else if (isNaN(duration_m) || duration_m > 59 || duration_m < 0) {
       show_msg("Please enter a valid minute in <b>Exam duration M</br> field");
       return false;
     } else if (duration_h == 0 && duration_m == 0) {
@@ -261,6 +261,10 @@
     }
 
     json_ques['duration'] = duration_h * 60 + duration_m; //duration is mins
+    let time_select =  $('#time_selection option:selected').val();
+    if(time_select == "1" && json_ques.starts[0] < 12){
+      json_ques.starts[0] += 12;
+    }
 
     for (let count = 0; count < mcq; count++) {
       json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
@@ -297,7 +301,7 @@
         //write something
       },
       error: function() {
-        console.log("Image is not uploaded, please try again")
+        // console.log("Image is not uploaded, please try again")
       }
     });
   }

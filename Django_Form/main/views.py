@@ -1,18 +1,27 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import requests
 from django.contrib.auth import authenticate, login
-from . import models
+from .models import Question
+from .delta_time import Delta_time
+import requests
 import json
 
 
+
 def home(req):
-    content = models.Question.objects.all()
+    content = Question.objects.all()
     return render(req, "main/home/index.html", {'content': content})
 
 
 def questions(req, ques_id):
-    return render(req, "main/questions/index.html")
+    json_ques = Question.objects.get(pk=ques_id).json_ques
+    content =  json.loads(json_ques)
+    time_obj = Delta_time(content['starts'][0], content['starts'][1])
+
+    if time_obj.h < 0 or (time_obj.h==0 and time_obj.m==0 and time_obj.s == 0):
+        return render(req, "main/questions/question.html", {'json_ques': json_ques})
+    else:
+        return render(req, "main/questions/countdown.html", {'time_h': time_obj.h, 'time_m': time_obj.m, 'time_s': time_obj.s})
 
 
 def page_admin(req):
@@ -47,7 +56,7 @@ def upload_img(req):
 def write(req):
     if req.method == 'POST':
         json_ques = req.POST.get('json_ques')
-        entry = models.Question(json_ques=json_ques, title=json.loads(json_ques)['title'])
+        entry = Question(json_ques=json_ques, title=json.loads(json_ques)['title'])
         entry.save()
         return HttpResponse("OK")
     else:

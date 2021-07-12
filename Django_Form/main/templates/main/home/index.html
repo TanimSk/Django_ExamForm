@@ -49,10 +49,8 @@
 
   let ques_id;
 
-  let id_count = 0;
   {%for cont in content %}
-    id_count++;
-    $('#container').append('<div class="card anime cards" id="' + id_count + '" onclick="redirect(this.id);"><div class="card-content hover"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
+    $('#container').append('<div class="card anime cards" id="' + '{{ cont.id }}' + '" onclick="redirect(this.id);"><div class="card-content hover"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
   {% endfor %}
 
 

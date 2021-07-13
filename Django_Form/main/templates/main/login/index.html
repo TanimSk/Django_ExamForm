@@ -28,20 +28,18 @@
     padding-bottom: 10px;
   }
 
-  .fa {
+  /* .fa {
     margin-left: 5px;
-  }
+  } */
 </style>
+<center>
+  <div class="container has-text-centered">
+    <div class="column is-4 is-offset-4">
+      <div class="box">
+        <figure class="avatar">
+          <img src="{% static 'admin.jpg' %}" style="height: 10em;">
+        </figure>
 
-
-<div class="container has-text-centered">
-  <div class="column is-4 is-offset-4">
-    <div class="box">
-      <figure class="avatar">
-        <img src="{% static 'logo.png' %}" style="height: 10em;">
-      </figure>
-
-      <form action="pageAdmin" method="post">
         <div class="field">
           <div class="control">
             <input name="handle" class="input is-primary" type="text" placeholder="Your Handle" autofocus="" style="height: 3em;" id="handle">
@@ -54,46 +52,80 @@
           </div>
         </div>
 
-        <div class="field">
-          <label class="checkbox">
-            <input type="checkbox">
-            Remember me
-          </label>
-        </div>
-
         {% csrf_token %}
 
-        <!-- <button class="button is-block is-info is-large is-fullwidth">Login <i class="fa fa-sign-in" aria-hidden="true"></i></button> -->
-        <input type="submit" name="" value="">
-      </form>
+        <button class="button is-block is-info is-large is-fullwidth" onclick="post_data();">Login <i class="fa fa-sign-in" aria-hidden="true"></i></button>
 
-
-
+      </div>
     </div>
   </div>
-</div>
+
+  <div id="msg_box" hidden>
+    <br><br>
+    <article class="message is-warning" style="width: 50%; margin: auto; min-width: 280px;">
+      <div class="message-header">
+        <p>Alert</p><button class="delete" aria-label="delete" onclick="delete_msg();"></button>
+      </div>
+      <div class="message-body" id="msg_content"></div>
+    </article>
+  </div>
+
+</center>
+
+
+<br><br>
 
 <script type="text/javascript">
-  let handle = document.getElementById('handle').value;
-  let password = document.getElementById('password').value;
 
-  // function auth(){
-  //   $.ajax({
-  //     url: '/auth_user',            //self-calling
-  //     data: {
-  //       handle: handle,
-  //       password: password,
-  //       csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
-  //     },
-  //     type: 'POST',
-  //     dataType: 'json',
-  //     cache: false,
-  //     complete: function(data, textStatus, jqXHR) {
-  //       location.href = "/";
-  //     }
-  //   });
-
+  function delete_msg() {
+    $('#msg_box').hide();
   }
+
+  function show_msg(string) {
+    $("#msg_box").fadeIn();
+    document.getElementById('msg_content').innerHTML = string;
+  }
+
+  function get_link(url){
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has(url)){
+      return urlParams.get(url);
+    }
+    else{
+      return '/';
+    }
+  }
+
+  function post_data() {
+    let handle = document.getElementById('handle').value;
+    let password = document.getElementById('password').value;
+    $.ajax({
+      url: '', //self-calling
+      data: {
+        handle: handle,
+        password: password,
+        csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+      },
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+          if(data.is_user == true){
+            window.location.href = get_link('next');
+          }
+          else{
+            show_msg("wrong password or handle");
+          }
+        },
+        error: function() {
+          console.log("Image is not uploaded, please try again");
+        }
+    });
+  }
+
+
+
+
 </script>
 
 {% endblock %}

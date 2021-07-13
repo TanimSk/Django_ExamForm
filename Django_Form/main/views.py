@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
-from .models import Question
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
+from .models import Question, Student
 from .delta_time import Delta_time
 import requests
 import json
-
 
 
 def home(req):
@@ -14,28 +14,23 @@ def home(req):
 
 
 def questions(req, ques_id):
-    json_ques = Question.objects.get(pk=ques_id).json_ques
-    content =  json.loads(json_ques)
-    time_obj = Delta_time(content['starts'][0], content['starts'][1])
+    content = json.loads(Question.objects.get(pk=ques_id).json_ques)
+    time_obj = Delta_time(content['starts'])
 
-    if time_obj.h < 0 or (time_obj.h==0 and time_obj.m==0 and time_obj.s == 0):
-        return render(req, "main/questions/question.html", {'json_ques': json_ques})
+    # if req.method == 'POST':
+    #
+    #     entry = Student(name=, phone_number=, email=, response_ans=,)
+    #     entry.save()
+
+    if time_obj.passed_s <= 0:
+        return render(req, "main/questions/question.html", {'title': content['title'], 'ques_qa': content['ques_qa'], 'ques_mcq': content['ques_mcq'], 'mcq': content['mcq'], 'images': content['images'] ,'remaining_time': content['duration'] + time_obj.passed_s})
     else:
         return render(req, "main/questions/countdown.html", {'time_h': time_obj.h, 'time_m': time_obj.m, 'time_s': time_obj.s})
 
 
+
+@login_required(login_url='login')
 def page_admin(req):
-    # if req.method == 'POST':
-    #     handle = req.POST['handle']
-    #     password = req.POST['password']
-    #     user = authenticate(req, username=handle, password=password)
-    #     if user is not None:
-    #         login(req, user)
-    #         return render(req, "main/pageAdmin/index.html")
-    #     else:
-    #         return HttpResponse("wrong")
-    # else:
-    #     return render(req, "main/login/index.html")
     return render(req, "main/pageAdmin/index.html")
 
 
@@ -61,3 +56,17 @@ def write(req):
         return HttpResponse("OK")
     else:
         return HttpResponse("ERROR!")
+
+
+def auth_login(req):
+    if req.method == 'POST':
+        handle = req.POST['handle']
+        password = req.POST['password']
+        user = authenticate(req, username=handle, password=password)
+        if user is not None:
+            login(req, user)
+            return HttpResponse(json.dumps({'is_user': True}), content_type='application/json')
+        else:
+            return HttpResponse(json.dumps({'is_user': False}), content_type='application/json')
+    else:
+        return render(req, "main/login/index.html")

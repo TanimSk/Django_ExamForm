@@ -76,8 +76,8 @@
           &nbsp;
           <div class="select is-primary time_spec" style="">
             <select id="time_selection">
-              <option value="0">AM</option>
               <option value="1">PM</option>
+              <option value="0">AM</option>
             </select>
           </div>
         </div>
@@ -217,7 +217,6 @@
 
   function save() {
     let json_ques = {
-      'starts': [], //starts 1st member of array is hour, 2nd is minutes
       'ques_mcq': [],
       'mcq': {},
       'mcq_correct': {},
@@ -232,18 +231,18 @@
     let qa = $('._qa_').length;
 
 
-    json_ques.starts[0] = Number(document.getElementById('exam_start_h').value); //hour
-    json_ques.starts[1] = Number(document.getElementById('exam_start_m').value); //min
+    let start_h = Number(document.getElementById('exam_start_h').value); //hour
+    let start_m = Number(document.getElementById('exam_start_m').value); //min
 
     let duration_h = Number(document.getElementById('exam_duration_h').value);
     let duration_m = Number(document.getElementById('exam_duration_m').value);
 
     json_ques.title = document.getElementById('_title_').value;
 
-    if (isNaN(json_ques.starts[0]) || json_ques.starts[0] > 12 || json_ques.starts[0] < 1) {
+    if (isNaN(start_h) || start_h > 12 || start_h < 1) {
       show_msg("Please enter a valid hour in <b>Exam starts at H</b> field <br> (range: 1-12) only numbers!");
       return false;
-    } else if (isNaN(json_ques.starts[1]) || json_ques.starts[1] > 59 || json_ques.starts[1] < 0) {
+    } else if (isNaN(start_m) || start_m > 59 || start_m < 0) {
       show_msg("Please enter a valid minute in <b>Exam starts at M</b> field <br> (range: 0-59) only numbers!");
       return false;
     } else if (isNaN(duration_h) || duration_h < 0) {
@@ -260,11 +259,15 @@
       return false;
     }
 
-    json_ques['duration'] = duration_h * 60 + duration_m; //duration is mins
+    //im sec
+
+    json_ques['duration'] = duration_h * 3600 + duration_m * 60;
+
     let time_select =  $('#time_selection option:selected').val();
-    if(time_select == "1" && json_ques.starts[0] < 12){
-      json_ques.starts[0] += 12;
+    if(time_select == "1" && start_h < 12){
+      start_h += 12;
     }
+    json_ques['starts'] = start_h * 3600 + start_m * 60;
 
     for (let count = 0; count < mcq; count++) {
       json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();

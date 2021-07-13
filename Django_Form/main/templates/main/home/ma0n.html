@@ -222,6 +222,7 @@
           let qa = $('.qa_correct').length;
           let correct_mcq = [];
           let qa_answer;
+
           for (let count = 0; count < qa; count++) {
             qa_answer = $('.qa_correct:eq(' + count + ')').val();
             $('#table_body').append(
@@ -230,6 +231,7 @@
               <td>' + qa_answer + '</td></tr>'
             );
           }
+          
           let mcq_mark = 0;
           let array = [];
           let mcq_answer = [];

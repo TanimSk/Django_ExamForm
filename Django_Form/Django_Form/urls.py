@@ -25,5 +25,6 @@ urlpatterns = [
     path('pageAdmin', views.page_admin, name='pageAdmin'),
     path('write', views.write, name='write'),
     path('upload_img', views.upload_img, name='upload_img'),
-    path('questions/<int:ques_id>', views.questions, name='questions')
+    path('questions/<int:ques_id>', views.questions, name='questions'),
+    path('login', views.auth_login, name='login'),
 ]

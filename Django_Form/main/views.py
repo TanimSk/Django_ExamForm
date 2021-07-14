@@ -37,36 +37,24 @@ def questions(req, ques_id):
 
 @login_required(login_url='login')
 def admin_dashboard(req, redirect_url):
-    if redirect_url == 'create':
-        return render(req, "main/AdminPage/create_question.html")
-    elif redirect_url == 'result':
-        return HttpResponse("hello")
-    elif redirect_url == 'main':
-        return render(req, "main/AdminPage/dashboard.html")
 
-
-def upload_img(req):
-    img64 = req.POST.get('base64_data')
-
-    url = "https://api.imgbb.com/1/upload"
-    payload = {
-        "key": "bbbcf324565e027777302dbe3303c622",
-        "image": img64,
-        "expiration": '172800',
-    }
-    url = requests.post(url, payload).json()['data']['url']
-
-    return HttpResponse(json.dumps({'url': url}), content_type='application/json')
-
-
-def write(req):
     if req.method == 'POST':
         json_ques = req.POST.get('json_ques')
         entry = Question(json_ques=json_ques, title=json.loads(json_ques)['title'])
         entry.save()
-        return HttpResponse("OK")
+        return HttpResponse(json.dumps({'done': True}), content_type='application/json')
+
+    if redirect_url == 'create':
+        return render(req, "main/AdminPage/create_question.html")
+
+    elif redirect_url == 'result':
+        return HttpResponse("hello")
+
+    elif redirect_url == 'main':
+        return render(req, "main/AdminPage/dashboard.html")
+
     else:
-        return HttpResponse("ERROR!")
+        return HttpResponse("<h1>ERROR!</h1>")
 
 
 def auth_login(req):

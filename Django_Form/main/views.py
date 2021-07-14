@@ -17,21 +17,32 @@ def questions(req, ques_id):
     content = json.loads(Question.objects.get(pk=ques_id).json_ques)
     time_obj = Delta_time(content['starts'])
 
-    # if req.method == 'POST':
-    #
-    #     entry = Student(name=, phone_number=, email=, response_ans=,)
-    #     entry.save()
+    if req.method == 'POST':
+        name = req.POST.get('name')
+        email = req.POST.get('email')
+        number = req.POST.get('number')
+        response_ans = req.POST.get('response_ans')
+        entry = Student(name=name, phone_number=number, email=email, response_ans=response_ans, ques_id=ques_id)
+        entry.save()
 
     if time_obj.passed_s <= 0:
-        return render(req, "main/questions/question.html", {'title': content['title'], 'ques_qa': content['ques_qa'], 'ques_mcq': content['ques_mcq'], 'mcq': content['mcq'], 'images': content['images'] ,'remaining_time': content['duration'] + time_obj.passed_s})
+        return render(req, "main/questions/question.html", {'title': content['title'], 'ques_qa': content['ques_qa'],
+                                                            'ques_mcq': content['ques_mcq'], 'mcq': content['mcq'],
+                                                            'images': content['images'],
+                                                            'remaining_time': content['duration'] + time_obj.passed_s})
     else:
-        return render(req, "main/questions/countdown.html", {'time_h': time_obj.h, 'time_m': time_obj.m, 'time_s': time_obj.s})
-
+        return render(req, "main/questions/countdown.html", {'time_h': time_obj.h, 'time_m': time_obj.m,
+                                                             'time_s': time_obj.s})
 
 
 @login_required(login_url='login')
-def page_admin(req):
-    return render(req, "main/pageAdmin/index.html")
+def admin_dashboard(req, redirect_url):
+    if redirect_url == 'create':
+        return render(req, "main/AdminPage/create_question.html")
+    elif redirect_url == 'result':
+        return HttpResponse("hello")
+    elif redirect_url == 'main':
+        return render(req, "main/AdminPage/dashboard.html")
 
 
 def upload_img(req):

@@ -1,0 +1,96 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+
+<title>Dashboard</title>
+
+
+<style media="screen">
+  body {
+    word-break: break-all;
+  }
+
+  .flex_box {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .card {
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #d1d1d1;
+    margin: .5em;
+    flex: 30%;
+  }
+
+  .hover:hover {
+    transition: .2s;
+    background-color: #f0fff4;
+    cursor: pointer;
+  }
+
+  ._icon_ {
+    color: #5dce7e;
+  }
+</style>
+
+<center>
+  <div class="flex_box" id="container">
+
+    <div class="card anime hover" onclick="redirect('create');">
+      <div class="card-content">
+        <div class="content has-text-centered">
+          <h1>
+            <i class="fa fa-edit _icon_"></i>
+          </h1>
+          Create Question
+        </div>
+      </div>
+    </div>
+
+    <div class="card anime hover" onclick="redirect('http://127.0.0.1:8000/admin');">
+      <div class="card-content">
+        <div class="content has-text-centered">
+          <h1>
+            <i class="fa fa-sliders _icon_"></i>
+          </h1>
+          Configuration
+        </div>
+      </div>
+    </div>
+
+    <div class="card anime hover" onclick="redirect('result');">
+      <div class="card-content">
+        <div class="content has-text-centered">
+          <h1>
+            <i class="fa fa-bar-chart _icon_" aria-hidden="true"></i>
+          </h1>
+          Results
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<br><br><br>
+
+<a href="http://127.0.0.1:8000/admin/logout" class="anime">
+  <button class="button is-danger is-outlined">
+    Logout &nbsp;
+    <i class="fa fa-sign-out"></i>
+  </button>
+</a>
+
+
+
+</center>
+
+
+<script type="text/javascript">
+  function redirect(url) {
+    window.location.href = url;
+  }
+</script>
+
+{% endblock %}

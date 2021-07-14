@@ -19,10 +19,8 @@ from main import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include('main.urls'))
     path('', views.home, name='home'),
-    # path('', include('django.contrib.auth.urls')),
-    path('pageAdmin', views.page_admin, name='pageAdmin'),
+    path('dashboard/<str:redirect_url>', views.admin_dashboard, name='dashboard'),
     path('write', views.write, name='write'),
     path('upload_img', views.upload_img, name='upload_img'),
     path('questions/<int:ques_id>', views.questions, name='questions'),

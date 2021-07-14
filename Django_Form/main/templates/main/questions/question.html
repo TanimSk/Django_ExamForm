@@ -83,14 +83,12 @@
   let mcq = {{ mcq | safe }};
   let images = {{ images | safe }};
 
-  console.log(ques_qa, ques_mcq, mcq, images);
-
   let response_ans = {
     'mcq_correct': {},
     'qa_correct': []
-  }
+  };
 
-  $("#content").append("<h3>" + json.title + "</h3>");
+  $("#content").append("<h3>" + '{{ title }}' + "</h3>");
   for (let i = 0; i < ques_qa.length; i++) {
     $("#content").append("<hr><div class='ques_div'><h5 style='float:left;'> &#9654;&nbsp;" + ques_qa[i] + "</h5><br>\
     <input style=\"background-color:#fdfffa;\" class=\"input is-primary qa_correct\" type=\"text\" placeholder=\"Answer the short question\"></div>");
@@ -140,32 +138,47 @@
       return false;
     }
 
-    let qa = $('.qa_correct').length;
+    let qa = ques_qa.length;
 
     for (let count = 0; count < qa; count++) {
-      qa_correct[count] = $('.qa_correct:eq(' + count + ')').val();
+      response_ans.qa_correct[count] = $('.qa_correct:eq(' + count + ')').val();
     }
 
+    let mcq_size = ques_mcq.length;
+    let array_count = 0;
+    for (count = 0; count < mcq_size; count++){
+      response_ans.mcq_correct[count] = [];                 //count -> question number
+      let size = mcq[count].length;                         // size -> number of mcq_options
+      array_count = 0;
+      for(let ct = 0; ct < size; ct++){
+        if ($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").is(':checked')) {
+          response_ans.mcq_correct[count][array_count] = $(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val();
+          array_count++;
+      }
+    }
+  }
 
+    console.log(response_ans);
 
-    // $.ajax({
-    //   url: '', //self-calling
-    //   data: {
-    //     name: name,
-    //     email: email,
-    //     number: number,
-    //     csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
-    //   },
-    //   type: 'POST',
-    //   dataType: 'json',
-    //   cache: false,
-    //   success: function(data) {
-    //     console.log(1111111111);
-    //   },
-    //   error: function() {
-    //     console.log("Image is not uploaded, please try again");
-    //   }
-    // });
+    $.ajax({
+      url: '', //self-calling
+      data: {
+        name: name,
+        email: email,
+        number: number,
+        response_ans: JSON.stringify(response_ans),
+        csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+      },
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        console.log(1111111111);
+      },
+      error: function() {
+        console.log("Image is not uploaded, please try again");
+      }
+    });
 
   }
 

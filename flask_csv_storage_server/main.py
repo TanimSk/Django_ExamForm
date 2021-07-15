@@ -13,19 +13,19 @@ def save():
 
     print(mode, filename, row, key)
 
-    if key == 'KEY':
-        if mode == 'w':
+    if key == '**':
+        if mode == '**':
             Mcsv.write_row(filename, row)
             return 'OK'
 
-        elif mode == 'wh':
+        elif mode == '**':
             Mcsv.write_rows(filename, row)
             return 'OK'
 
-        elif mode == 'r':
+        elif mode == '**':
             return Pycsv.get_csv(filename)
 
-        elif mode == 'd':
+        elif mode == '**':
             Mcsv.remove_csv(filename)
             return 'OK'
         else:

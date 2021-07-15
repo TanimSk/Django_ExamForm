@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from .models import Question, Student
 from .delta_time import Delta_time
+from . import Cdate
 import requests
 import json
 
@@ -14,18 +15,24 @@ def home(req):
 
 
 def questions(req, ques_id):
-    content = json.loads(Question.objects.get(pk=ques_id).json_ques)
+    content = Question.objects.get(pk=ques_id).json_ques
     time_obj = Delta_time(content['starts'])
 
-    if req.method == 'POST':
-        name = req.POST.get('name')
-        email = req.POST.get('email')
-        number = req.POST.get('number')
-        response_ans = req.POST.get('response_ans')
-        entry = Student(name=name, phone_number=number, email=email, response_ans=response_ans, ques_id=ques_id)
-        entry.save()
+    if content['duration'] + time_obj.passed_s < 0 or content['date'] != Cdate.this_date():
+        return redirect('/')
 
-    if time_obj.passed_s <= 0:
+    elif time_obj.passed_s <= 0:
+        if req.method == 'POST':
+            name = req.POST.get('name')
+            email = req.POST.get('email')
+            number = req.POST.get('number')
+            csv_field = req.POST.get('csv_field')
+            entry = Student(name=name, phone_number=number, email=email, ques_id=ques_id)
+            entry.save()
+            requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"chondro_bindu/{ques_id}.csv", 'row': csv_field, 'key': 'KEY'})
+
+            return HttpResponse(json.dumps({'done': True}), content_type='application/json')
+
         return render(req, "main/questions/question.html", {'title': content['title'], 'ques_qa': content['ques_qa'],
                                                             'ques_mcq': content['ques_mcq'], 'mcq': content['mcq'],
                                                             'images': content['images'],
@@ -37,11 +44,14 @@ def questions(req, ques_id):
 
 @login_required(login_url='login')
 def admin_dashboard(req, redirect_url):
-
     if req.method == 'POST':
-        json_ques = req.POST.get('json_ques')
-        entry = Question(json_ques=json_ques, title=json.loads(json_ques)['title'])
+        json_ques = json.loads(req.POST.get('json_ques'))
+        json_ques['date'] = Cdate.this_date()
+        csv_field = req.POST.get('csv_field')
+        print(csv_field)
+        entry = Question(json_ques=json_ques, title=json_ques['title'])
         entry.save()
+        requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'wh', 'filename': f"chondro_bindu/{entry.id}.csv", 'row': csv_field, 'key': 'KEY'})
         return HttpResponse(json.dumps({'done': True}), content_type='application/json')
 
     if redirect_url == 'create':

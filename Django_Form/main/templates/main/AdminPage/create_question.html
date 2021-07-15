@@ -1,6 +1,9 @@
 {% extends "main/base/index.html" %}
 {% block content %}
 
+<script src="https://momentjs.com/downloads/moment.js"></script>
+<script src="https://momentjs.com/downloads/moment-timezone-with-data.js"></script>
+
 <title>pageAdmin</title>
 
 <style media="screen">
@@ -184,133 +187,155 @@
   }
 
   function send_img_to_server(base64) {
-      $.ajax({
-        url: "https://api.imgbb.com/1/upload",
-        type: 'POST',
-        data: {
-          key: "bbbcf324565e027777302dbe3303c622",
-          image: base64.split("base64,")[1],
-          expiration: '172800',
-        },
-        cache: false,
-        success: function(data) {
-          document.getElementById("save_btn").disabled = false;
-          img_dict[count_ques-1][count_img] = data['data']['url'];
-          count_img++;
-        },
-        error: function() {
-          show_msg("image is not uploaded! <br> try using another format");
+    $.ajax({
+      url: "https://api.imgbb.com/1/upload",
+      type: 'POST',
+      data: {
+        key: "bbbcf324565e027777302dbe3303c622",
+        image: base64.split("base64,")[1],
+        expiration: '172800',
+      },
+      cache: false,
+      success: function(data) {
+        document.getElementById("save_btn").disabled = false;
+        img_dict[count_ques - 1][count_img] = data['data']['url'];
+        count_img++;
+      },
+      error: function() {
+        show_msg("image is not uploaded! <br> try using another format");
+      }
+    });
+
+  }
+
+
+  function show_msg(string) {
+    document.getElementById('msg_box').hidden = false;
+    document.getElementById('msg_content').innerHTML = string;
+  }
+
+  function delete_msg() {
+    document.getElementById('msg_box').hidden = true;
+  }
+
+  function save() {
+    let json_ques = {
+      'ques_mcq': [],
+      'mcq': {},
+      'mcq_correct': {},
+      'ques_qa': [],
+      'qa_correct': [],
+      'images': img_dict
+    };
+
+    let csv_field = [
+      ['', '', ''],
+      ['name', 'duration', 'mark']
+    ];
+
+    // console.log(json_ques);
+
+    let mcq = $('._mcq_').length;
+    let mcq_div = $('.mcq').length;
+    let qa = $('._qa_').length;
+
+
+    let start_h = Number(document.getElementById('exam_start_h').value); //hour
+    let start_m = Number(document.getElementById('exam_start_m').value); //min
+
+    let duration_h = Number(document.getElementById('exam_duration_h').value);
+    let duration_m = Number(document.getElementById('exam_duration_m').value);
+
+    json_ques.title = document.getElementById('_title_').value;
+
+    if (isNaN(start_h) || start_h > 12 || start_h < 1) {
+      show_msg("Please enter a valid hour in <b>Exam starts at H</b> field <br> (range: 1-12) only numbers!");
+      return false;
+    } else if (isNaN(start_m) || start_m > 59 || start_m < 0) {
+      show_msg("Please enter a valid minute in <b>Exam starts at M</b> field <br> (range: 0-59) only numbers!");
+      return false;
+    } else if (isNaN(duration_h) || duration_h < 0) {
+      show_msg("Please enter a valid hour in <b>Exam duration H</b> field");
+      return false;
+    } else if (isNaN(duration_m) || duration_m > 59 || duration_m < 0) {
+      show_msg("Please enter a valid minute in <b>Exam duration M</br> field");
+      return false;
+    } else if (duration_h == 0 && duration_m == 0) {
+      show_msg("Please enter a valid duration in <b>Exam duration</br> field");
+      return false;
+    } else if (json_ques.title == "" || json_ques.title.search(/\`|\~|\!|\@|\$|\%|\^|\&|\*|\+|\||\\|\'|\>|\?|\/|\""|\;/g) != -1 || json_ques.title.replace(/ /g, '') == "") {
+      show_msg("Please Enter a Valid Title.<br>(remove special characters)");
+      return false;
+    }
+
+    json_ques['duration'] = duration_h * 3600 + duration_m * 60; //in sec
+
+    let time_select = $('#time_selection option:selected').val();
+    if (time_select == "1" && start_h < 12) {
+      start_h += 12;
+    }
+
+    let m = moment().tz("Asia/Dhaka");
+
+    if (start_h < m.hour()) {
+      show_msg("Please enter a valid hour in <b>starts at H field</b>");
+      return false;
+    } else if (start_h == m.hour() && start_m < m.minute()) {
+      show_msg("Please enter a valid minute in <b>starts at M field</b>");
+      return false;
+    }
+
+    document.getElementById("save_btn").disabled = true;
+
+    json_ques['starts'] = start_h * 3600 + start_m * 60;
+
+    for (let count = 0; count < mcq; count++) {
+      json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
+      csv_field[0].push(json_ques.ques_mcq[count]);
+    }
+    for (count = 0; count < qa; count++) {
+      json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();
+      csv_field[0].push(json_ques.ques_qa[count]);
+      json_ques.qa_correct[count] = $('.answer_qa:eq(' + count + ')').val();
+      csv_field[1].push(json_ques.qa_correct[count]);
+    }
+    for (count = 0; count < mcq_div; count++) {
+      let n_options = $('.mcq:eq(' + count + ') .radio_btn').length;
+      json_ques.mcq[count] = [];
+      json_ques.mcq_correct[count] = [];
+      let serial = 0;
+      for (let c = 0; c < n_options; c++) {
+        let mcq_options = $('.mcq:eq(' + count + ') .answer-option:eq(' + c + ')').val();
+        json_ques.mcq[count][c] = mcq_options;
+        if ($('.mcq:eq(' + count + ') .radio_btn:eq(' + c + ')').is(':checked')) {
+          json_ques.mcq_correct[count][serial] = mcq_options;
+          serial++;
+          csv_field[1].push(json_ques.mcq_correct[count]);
         }
-      });
-
+      }
     }
 
-
-    function show_msg(string) {
-      document.getElementById('msg_box').hidden = false;
-      document.getElementById('msg_content').innerHTML = string;
-    }
-
-    function delete_msg() {
-      document.getElementById('msg_box').hidden = true;
-    }
-
-    function save() {
-      let json_ques = {
-        'ques_mcq': [],
-        'mcq': {},
-        'mcq_correct': {},
-        'ques_qa': [],
-        'qa_correct': [],
-        'images': img_dict
-      };
-      // console.log(json_ques);
-
-      let mcq = $('._mcq_').length;
-      let mcq_div = $('.mcq').length;
-      let qa = $('._qa_').length;
-
-
-      let start_h = Number(document.getElementById('exam_start_h').value); //hour
-      let start_m = Number(document.getElementById('exam_start_m').value); //min
-
-      let duration_h = Number(document.getElementById('exam_duration_h').value);
-      let duration_m = Number(document.getElementById('exam_duration_m').value);
-
-      json_ques.title = document.getElementById('_title_').value;
-
-      if (isNaN(start_h) || start_h > 12 || start_h < 1) {
-        show_msg("Please enter a valid hour in <b>Exam starts at H</b> field <br> (range: 1-12) only numbers!");
-        return false;
-      } else if (isNaN(start_m) || start_m > 59 || start_m < 0) {
-        show_msg("Please enter a valid minute in <b>Exam starts at M</b> field <br> (range: 0-59) only numbers!");
-        return false;
-      } else if (isNaN(duration_h) || duration_h < 0) {
-        show_msg("Please enter a valid hour in <b>Exam duration H</b> field");
-        return false;
-      } else if (isNaN(duration_m) || duration_m > 59 || duration_m < 0) {
-        show_msg("Please enter a valid minute in <b>Exam duration M</br> field");
-        return false;
-      } else if (duration_h == 0 && duration_m == 0) {
-        show_msg("Please enter a valid duration in <b>Exam duration</br> field");
-        return false;
-      } else if (json_ques.title == "" || json_ques.title.search(/\`|\~|\!|\@|\$|\%|\^|\&|\*|\+|\||\\|\'|\>|\?|\/|\""|\;/g) != -1 || json_ques.title.replace(/ /g, '') == "") {
-        show_msg("Please Enter a Valid Title.<br>(remove special characters)");
-        return false;
+    json_ques = JSON.stringify(json_ques);
+    csv_field = JSON.stringify(csv_field);
+    $.ajax({
+      url: '', //self-calling
+      data: {
+        json_ques: json_ques,
+        csv_field: csv_field,
+        csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
+      },
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        window.location.href = 'http://127.0.0.1:8000/';
+      },
+      error: function() {
+        show_msg("Internal Server Error <br> please try again later");
+        document.getElementById("save_btn").disabled = false;
       }
-
-      document.getElementById("save_btn").disabled = true;
-
-      //im sec
-
-      json_ques['duration'] = duration_h * 3600 + duration_m * 60;
-
-      let time_select = $('#time_selection option:selected').val();
-      if (time_select == "1" && start_h < 12) {
-        start_h += 12;
-      }
-      json_ques['starts'] = start_h * 3600 + start_m * 60;
-
-      for (let count = 0; count < mcq; count++) {
-        json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
-      }
-      for (count = 0; count < qa; count++) {
-        json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();
-        json_ques.qa_correct[count] = $('.answer_qa:eq(' + count + ')').val();
-      }
-      for (count = 0; count < mcq_div; count++) {
-        let n_options = $('.mcq:eq(' + count + ') .radio_btn').length;
-        json_ques.mcq[count] = [];
-        json_ques.mcq_correct[count] = [];
-        let serial = 0;
-        for (let c = 0; c < n_options; c++) {
-          let mcq_options = $('.mcq:eq(' + count + ') .answer-option:eq(' + c + ')').val();
-          json_ques.mcq[count][c] = mcq_options;
-          if ($('.mcq:eq(' + count + ') .radio_btn:eq(' + c + ')').is(':checked')) {
-            json_ques.mcq_correct[count][serial] = c;
-            serial++;
-          }
-        }
-      }
-      json_ques = JSON.stringify(json_ques);
-      $.ajax({
-        url: '', //self-calling
-        data: {
-          json_ques: json_ques,
-          csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
-        },
-        type: 'POST',
-        dataType: 'json',
-        cache: false,
-        success: function(data) {
-          window.location.href = 'http://127.0.0.1:8000/';
-        },
-        error: function() {
-          show_msg("Internal Server Error <br> please try again later");
-          document.getElementById("save_btn").disabled = false;
-        }
-      });
-    }
+    });
+  }
 </script>
 
 {% endblock %}

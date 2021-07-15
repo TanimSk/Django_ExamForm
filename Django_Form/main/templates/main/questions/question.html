@@ -35,20 +35,9 @@
 
 <center class="anime">
 
-  <div class="card question" style="background-color:#f5faf0;">
+  <div class="card" style="background-color:#fffde8;" id="student_creds">
     <div class="card-content">
-      <div class="content has-text-centered" id="content">
-
-      </div>
-    </div>
-  </div>
-
-  <br><br>
-
-
-  <div class="card" style="background-color:#fffde8;">
-    <div class="card-content">
-      <div class="content has-text-centered">Please fill up<br><br>
+      <div class="content has-text-centered"><b>Please fill up</b><br><br>
         <div class="field">
           <p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="name" class="input" type="text" placeholder="Enter your name"><span class="icon is-small is-left"><i class="fa fa-user"></i></span></p>
         </div>
@@ -58,7 +47,7 @@
         <div class="field">
           <p class="control has-icons-left"><input style="background-color:#fcfbf0;" id="number" class="input" type="text" placeholder="Enter your phone number"><span class="icon is-small is-left"><i class="fa fa-phone"></i></span></p>
         </div>
-        <button class="button is-primary is-outlined" onclick="send_ans_to_server();">Submit</button>
+        <button class="button is-primary is-outlined" onclick="save_creds();">Next</button>
       </div>
     </div>
   </div>
@@ -71,7 +60,19 @@
       </div>
       <div class="message-body" id="msg_content"></div>
     </article>
+    <br><br>
   </div>
+
+    <div class="card question" style="background-color:#f5faf0;" id="question_form">
+      <div class="card-content">
+        <div class="content has-text-centered" id="content">
+
+        </div>
+      </div>
+      <br>
+    <button class="button is-primary is-outlined" onclick="send_ans_to_server(this);">Submit</button>
+    <br><br>
+    </div>
 
   {% csrf_token %}
 
@@ -87,6 +88,10 @@
     'mcq_correct': {},
     'qa_correct': []
   };
+
+  let csv_field = [];
+
+  document.getElementById("question_form").style.display = 'none';
 
   $("#content").append("<h3>" + '{{ title }}' + "</h3>");
   for (let i = 0; i < ques_qa.length; i++) {
@@ -120,10 +125,13 @@
     document.getElementById('msg_content').innerHTML = string;
   }
 
-  function send_ans_to_server() {
-    let name = document.getElementById('name').value;
-    let email = document.getElementById('email').value;
-    let number = document.getElementById('number').value;
+
+  let name, email, number;
+
+  function save_creds() {
+    name = document.getElementById('name').value;
+    email = document.getElementById('email').value;
+    number = document.getElementById('number').value;
     if (name == "" || email == "" || number == "") {
       show_msg("Please fill the form properly");
       return false;
@@ -133,32 +141,39 @@
     } else if (!validateEmail(email)) {
       show_msg("Enter a valid mail");
       return false;
-    } else if (!(/^[0-9]*$/gm.test(number)) || number.length < 11) {
+    } else if (!(/^[0-9]*$/gm.test(number)) || number.length < 11 || number.length > 15) {
       show_msg("Enter your phone number correctly");
       return false;
     }
+    document.getElementById("student_creds").style.display = 'none';
+    document.getElementById("question_form").style.display = 'block';
+
+  }
+
+
+  function send_ans_to_server(obj) {
+    obj.disabled = true;
 
     let qa = ques_qa.length;
-
     for (let count = 0; count < qa; count++) {
-      response_ans.qa_correct[count] = $('.qa_correct:eq(' + count + ')').val();
+      // response_ans.qa_correct[count] = $('.qa_correct:eq(' + count + ')').val();
+      csv_field.push($('.qa_correct:eq(' + count + ')').val());
     }
 
     let mcq_size = ques_mcq.length;
-    let array_count = 0;
+    // let array_count = 0;
     for (count = 0; count < mcq_size; count++){
-      response_ans.mcq_correct[count] = [];                 //count -> question number
+      // response_ans.mcq_correct[count] = [];                //count -> question number
       let size = mcq[count].length;                         // size -> number of mcq_options
-      array_count = 0;
+      // array_count = 0;
       for(let ct = 0; ct < size; ct++){
         if ($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").is(':checked')) {
-          response_ans.mcq_correct[count][array_count] = $(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val();
-          array_count++;
+          // response_ans.mcq_correct[count][array_count] = $(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val();
+          csv_field.push($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val());
+          // array_count++;
       }
     }
   }
-
-    console.log(response_ans);
 
     $.ajax({
       url: '', //self-calling
@@ -166,17 +181,19 @@
         name: name,
         email: email,
         number: number,
-        response_ans: JSON.stringify(response_ans),
+        // response_ans: JSON.stringify(response_ans),
+        csv_field:  JSON.stringify(csv_field),
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
       },
       type: 'POST',
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.log(1111111111);
+        window.location.href = "http://127.0.0.1:8000/";
       },
       error: function() {
-        console.log("Image is not uploaded, please try again");
+        obj.disabled = false;
+        show_msg("Internal Server Error! (probably for overloading) <br> please try again later");
       }
     });
 
@@ -190,7 +207,7 @@
   $(document).ready(function() {
     $(window).scroll(function() {
       var distanceFromTop = $(document).scrollTop();
-      if (distanceFromTop >= '70') {
+      if (distanceFromTop >= '150') {
         $('#stickThis').addClass('stick');
       } else {
         $('#stickThis').removeClass('stick');
@@ -229,6 +246,7 @@
           document.getElementById('stickThis').style.backgroundColor = '#ffa696';
         } else {
           clearInterval(count);
+          window.location.href = '/';
         }
       }
     }, 1000);

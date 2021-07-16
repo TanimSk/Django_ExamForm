@@ -70,7 +70,7 @@
         </div>
       </div>
       <br>
-    <button class="button is-primary is-outlined" onclick="send_ans_to_server(this);">Submit</button>
+    <button class="button is-primary is-outlined" onclick="send_ans_to_server();" id="submission_btn">Submit</button>
     <br><br>
     </div>
 
@@ -83,20 +83,19 @@
   let ques_mcq = {{ ques_mcq | safe }};
   let mcq = {{ mcq | safe }};
   let images = {{ images | safe }};
-
+  let h, m, s;
+  // let csv_field = [];
   let response_ans = {
-    'mcq_correct': {},
-    'qa_correct': []
+    'mcq_ans': {},
+    'qa_ans': []
   };
-
-  let csv_field = [];
 
   document.getElementById("question_form").style.display = 'none';
 
   $("#content").append("<h3>" + '{{ title }}' + "</h3>");
   for (let i = 0; i < ques_qa.length; i++) {
     $("#content").append("<hr><div class='ques_div'><h5 style='float:left;'> &#9654;&nbsp;" + ques_qa[i] + "</h5><br>\
-    <input style=\"background-color:#fdfffa;\" class=\"input is-primary qa_correct\" type=\"text\" placeholder=\"Answer the short question\"></div>");
+    <input style=\"background-color:#fdfffa;\" class=\"input is-primary qa_correct\" type=\"text\" placeholder=\"Answer the short question\" value=''></div>");
   }
   for (i = 0; i < ques_mcq.length; i++) {
     $("#content").append("<hr><div class='mcq_holder ques_div'><h5 style='float:left;'> &#9654;&nbsp;" + ques_mcq[i] + "</h5><br></div>");
@@ -151,26 +150,26 @@
   }
 
 
-  function send_ans_to_server(obj) {
-    obj.disabled = true;
+  function send_ans_to_server() {
+    response_ans['name'] = name;
+    response_ans['duration'] = pad(h, 2) + ":" + pad(m, 2) + ":" + pad(s, 2);
+    document.getElementById('submission_btn').disabled = true;
 
     let qa = ques_qa.length;
     for (let count = 0; count < qa; count++) {
-      // response_ans.qa_correct[count] = $('.qa_correct:eq(' + count + ')').val();
-      csv_field.push($('.qa_correct:eq(' + count + ')').val());
+      response_ans.qa_ans[count] = $('.qa_correct:eq(' + count + ')').val();
     }
 
     let mcq_size = ques_mcq.length;
-    // let array_count = 0;
+    let array_count = 0;
     for (count = 0; count < mcq_size; count++){
-      // response_ans.mcq_correct[count] = [];                //count -> question number
+      response_ans.mcq_ans[count] = [];                //count -> question number
       let size = mcq[count].length;                         // size -> number of mcq_options
-      // array_count = 0;
+      array_count = 0;
       for(let ct = 0; ct < size; ct++){
         if ($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").is(':checked')) {
-          // response_ans.mcq_correct[count][array_count] = $(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val();
-          csv_field.push($(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val());
-          // array_count++;
+          response_ans.mcq_ans[count][array_count] = $(".mcq_holder:eq(" + count + ") .mcq_option:eq(" + ct + ")").val();
+          array_count++;
       }
     }
   }
@@ -181,8 +180,7 @@
         name: name,
         email: email,
         number: number,
-        // response_ans: JSON.stringify(response_ans),
-        csv_field:  JSON.stringify(csv_field),
+        response_ans: JSON.stringify(response_ans),
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
       },
       type: 'POST',
@@ -192,7 +190,7 @@
         window.location.href = "http://127.0.0.1:8000/";
       },
       error: function() {
-        obj.disabled = false;
+        document.getElementById('submission_btn').disabled = false;
         show_msg("Internal Server Error! (probably for overloading) <br> please try again later");
       }
     });
@@ -202,7 +200,6 @@
 
   let div = document.getElementById('stickThis');
   div.style.left = (window.innerWidth / 2 - div.offsetWidth / 2) + 'px';
-
 
   $(document).ready(function() {
     $(window).scroll(function() {
@@ -221,13 +218,12 @@
     return num;
   }
 
-
   function start_countdown(time) {
     let float_val = time / 3600;
-    let h = parseInt(float_val);
+    h = parseInt(float_val);
     float_val = (float_val - h) * 60
-    let m = parseInt(float_val);
-    let s = parseInt((float_val - m) * 60);
+    m = parseInt(float_val);
+    s = parseInt((float_val - m) * 60);
 
     document.getElementById('time').innerHTML = pad(h, 2) + ":" + pad(m, 2) + ":" + pad(s, 2);
     let count = setInterval(function() {

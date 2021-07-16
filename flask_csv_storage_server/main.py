@@ -12,14 +12,10 @@ def save():
     filename = request.form["filename"]
     key = request.form["key"]
 
-    # print(mode, key)
-
     if key == 'KEY':
         if mode == 'w':
             ques_json = request.form["ques_json"]
             ans_json = request.form["ans_json"]
-            # print(ques_json)
-            # print(type(ques_json))
             Mcsv.write_row(filename, evaluate(ques_json, ans_json))
             return 'OK'
 

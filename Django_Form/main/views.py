@@ -27,11 +27,9 @@ def questions(req, ques_id):
             email = req.POST.get('email')
             number = req.POST.get('number')
             response_ans = req.POST.get('response_ans')
-            print(response_ans, json.dumps(content))
             entry = Student(name=name, phone_number=number, email=email, ques_id=ques_id)
-            entry.save()
             requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY', 'ques_json': json.dumps(content), 'ans_json': response_ans})
-
+            entry.save()
             return HttpResponse(json.dumps({'done': True}), content_type='application/json')
 
         return render(req, "main/questions/question.html", {'title': content['title'], 'ques_qa': content['ques_qa'],
@@ -49,7 +47,6 @@ def admin_dashboard(req, redirect_url):
         json_ques = json.loads(req.POST.get('json_ques'))
         json_ques['date'] = Cdate.this_date()
         csv_field = req.POST.get('csv_field')
-        print(csv_field)
         entry = Question(json_ques=json_ques, title=json_ques['title'])
         entry.save()
         requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'wh', 'filename': f"chondro_bindu/{entry.id}.csv", 'row': csv_field, 'key': 'KEY'})

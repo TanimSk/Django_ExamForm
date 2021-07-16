@@ -83,6 +83,9 @@
 
   function show_msg(string) {
     $("#msg_box").fadeIn();
+    $('html, body').animate({
+        scrollTop: $("#msg_box").offset().top
+    }, 500);
     document.getElementById('msg_content').innerHTML = string;
   }
 

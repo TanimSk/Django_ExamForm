@@ -5,13 +5,13 @@ import json
 def write_rows(filename, rows):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     rows = json.loads(rows)
-    with open(filename, 'w') as csvfile:
+    with open(filename, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(rows)
 
 
 def write_row(filename, row):
-    with open(filename, 'a') as csvfile:
+    with open(filename, 'a', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(row)
 

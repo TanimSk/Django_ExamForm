@@ -122,7 +122,9 @@
 
   function show_msg(string) {
     $("#msg_box").fadeIn();
-    $.scrollTo($('#msg_box'), 1000);
+    $('html, body').animate({
+        scrollTop: $("#msg_box").offset().top
+    }, 500);
     document.getElementById('msg_content').innerHTML = string;
   }
 
@@ -253,9 +255,9 @@
 
   start_countdown({{ remaining_time }});
 
-  window.onblur = function(){
-    window.location.href = "";
-  };
+  // window.onblur = function(){
+  //   window.location.href = "";
+  // };
 
 </script>
 

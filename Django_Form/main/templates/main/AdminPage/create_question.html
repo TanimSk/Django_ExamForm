@@ -211,6 +211,9 @@
 
   function show_msg(string) {
     document.getElementById('msg_box').hidden = false;
+    $('html, body').animate({
+        scrollTop: $("#msg_box").offset().top
+    }, 500);
     document.getElementById('msg_content').innerHTML = string;
   }
 
@@ -289,16 +292,18 @@
 
     json_ques['starts'] = start_h * 3600 + start_m * 60;
 
-    for (let count = 0; count < mcq; count++) {
-      json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
-      csv_field[0].push(json_ques.ques_mcq[count]);
-    }
     for (count = 0; count < qa; count++) {
       json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();
       csv_field[0].push(json_ques.ques_qa[count]);
       json_ques.qa_correct[count] = $('.answer_qa:eq(' + count + ')').val();
       csv_field[1].push(json_ques.qa_correct[count]);
     }
+
+    for (let count = 0; count < mcq; count++) {
+      json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
+      csv_field[0].push(json_ques.ques_mcq[count]);
+    }
+
     for (count = 0; count < mcq_div; count++) {
       let n_options = $('.mcq:eq(' + count + ') .radio_btn').length;
       json_ques.mcq[count] = [];
@@ -310,9 +315,9 @@
         if ($('.mcq:eq(' + count + ') .radio_btn:eq(' + c + ')').is(':checked')) {
           json_ques.mcq_correct[count][serial] = mcq_options;
           serial++;
-          csv_field[1].push(json_ques.mcq_correct[count]);
         }
       }
+      csv_field[1].push(json_ques.mcq_correct[count].join());
     }
 
     json_ques = JSON.stringify(json_ques);

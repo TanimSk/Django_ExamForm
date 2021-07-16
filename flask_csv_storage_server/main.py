@@ -26,10 +26,10 @@ def save():
             Mcsv.write_rows(filename, row)
             return 'OK'
 
-        elif mode == 'r':
+        elif mode == '**':
             return Pycsv.get_csv(filename)
 
-        elif mode == 'd':
+        elif mode == '**':
             Mcsv.remove_csv(filename)
             return 'OK'
         else:

@@ -1,6 +1,7 @@
 from flask import Flask, request
 import Mcsv
 from evaluate import evaluate
+import json
 
 app = Flask(__name__)
 
@@ -11,14 +12,15 @@ def save():
     filename = request.form["filename"]
     key = request.form["key"]
 
-    print(mode, filename, row, key)
+    # print(mode, key)
 
     if key == 'KEY':
         if mode == 'w':
-            ques_json =  request.form["ques_json"]
+            ques_json = request.form["ques_json"]
             ans_json = request.form["ans_json"]
-
-            Mcsv.write_row(filename, evaluate.evaluate(ques_json, ans_json))
+            # print(ques_json)
+            # print(type(ques_json))
+            Mcsv.write_row(filename, evaluate(ques_json, ans_json))
             return 'OK'
 
         elif mode == 'wh':
@@ -26,10 +28,10 @@ def save():
             Mcsv.write_rows(filename, row)
             return 'OK'
 
-        elif mode == '**':
+        elif mode == 'r':
             return Pycsv.get_csv(filename)
 
-        elif mode == '**':
+        elif mode == 'd':
             Mcsv.remove_csv(filename)
             return 'OK'
         else:

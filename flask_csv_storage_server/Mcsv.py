@@ -11,7 +11,6 @@ def write_rows(filename, rows):
 
 
 def write_row(filename, row):
-    row = json.loads(row)
     with open(filename, 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(row)

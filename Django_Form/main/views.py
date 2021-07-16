@@ -27,10 +27,10 @@ def questions(req, ques_id):
             email = req.POST.get('email')
             number = req.POST.get('number')
             response_ans = req.POST.get('response_ans')
-            print(response_ans)
+            print(response_ans, json.dumps(content))
             entry = Student(name=name, phone_number=number, email=email, ques_id=ques_id)
             entry.save()
-            requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY', 'ques_json': content, 'ans_json': response_ans})
+            requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY', 'ques_json': json.dumps(content), 'ans_json': response_ans})
 
             return HttpResponse(json.dumps({'done': True}), content_type='application/json')
 

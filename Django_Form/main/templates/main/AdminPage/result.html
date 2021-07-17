@@ -1,0 +1,63 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+
+<title>Results</title>
+
+
+<style media="screen">
+  body {
+    word-break: break-all;
+  }
+
+  .flex_box {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .card {
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #d1d1d1;
+    margin: .5em;
+    flex: 30%;
+  }
+
+  .hover:hover {
+    transition: .2s;
+    background-color: #f0fff4;
+    cursor: pointer;
+  }
+
+</style>
+
+<center>
+
+<div style="width: 70%; min-width: 21em;" class="anime">
+  <i class="fa fa-bar-chart" aria-hidden="true" style="font-size: 5rem; color: #5dce7e;"></i>
+  <br>
+  <b style="font-size: 1.5rem;">Results</b>
+  <br><br>
+  <div class="flex_box" id="container">
+  </div>
+</div>
+</center>
+
+<script type="text/javascript">
+
+  let ques_id;
+
+  {%for cont in content %}
+    $('#container').append('<div class="card hover" id="' + '{{ cont.id }}' + '" onclick="redirect(this.id);"><div class="card-content"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
+  {% endfor %}
+
+
+function redirect(id){
+  window.location.href = 'result/'+id;
+}
+
+
+</script>
+
+{% endblock %}

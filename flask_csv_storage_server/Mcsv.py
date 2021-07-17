@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 import os
 import json
 
@@ -16,13 +17,9 @@ def write_row(filename, row):
         csvwriter.writerow(row)
 
 def get_csv(filename):
-    data = []
-    with open(filename, 'r') as file:
-        reader = csv.reader(file)
-        for r in reader:
-            data.append(r)
-
-    return data
+    a = pd.read_csv(filename)
+    a.rename( columns={'Unnamed: 0':'new column name'}, inplace=True )
+    return a.to_html()
 
 def remove_csv(filename):
     os.remove(filename)

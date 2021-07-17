@@ -43,6 +43,7 @@ def questions(req, ques_id):
 
 @login_required(login_url='login')
 def admin_dashboard(req, redirect_url):
+    print(redirect_url)
     if req.method == 'POST':
         json_ques = json.loads(req.POST.get('json_ques'))
         json_ques['date'] = Cdate.this_date()
@@ -56,13 +57,20 @@ def admin_dashboard(req, redirect_url):
         return render(req, "main/AdminPage/create_question.html")
 
     elif redirect_url == 'result':
-        return HttpResponse("hello")
+        content = Question.objects.all()
+        return render(req, "main/AdminPage/result.html", {'content': content})
 
     elif redirect_url == 'main':
         return render(req, "main/AdminPage/dashboard.html")
 
     else:
         return HttpResponse("<h1>ERROR!</h1>")
+
+@login_required(login_url='login')
+def result(req, ques_id):
+    r = requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'r', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY'})
+
+    return HttpResponse(r)
 
 
 def auth_login(req):

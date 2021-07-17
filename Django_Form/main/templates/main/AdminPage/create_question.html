@@ -232,8 +232,8 @@
     };
 
     let csv_field = [
-      ['', '', ''],
-      ['name', 'duration', 'mark']
+      ['name', 'duration', 'mark'],
+      ['Answers', '0']
     ];
 
     // console.log(json_ques);
@@ -291,6 +291,8 @@
     document.getElementById("save_btn").disabled = true;
 
     json_ques['starts'] = start_h * 3600 + start_m * 60;
+
+    csv_field[1].push(count_ques);
 
     for (count = 0; count < qa; count++) {
       json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();

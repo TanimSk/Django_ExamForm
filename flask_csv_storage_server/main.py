@@ -25,7 +25,7 @@ def save():
             return 'OK'
 
         elif mode == 'r':
-            return Pycsv.get_csv(filename)
+            return str(Mcsv.get_csv(filename))
 
         elif mode == 'd':
             Mcsv.remove_csv(filename)

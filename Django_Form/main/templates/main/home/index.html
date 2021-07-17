@@ -33,10 +33,15 @@
 </style>
 
 <center>
+
+<div style="width: 70%; min-width: 21em;" class="anime">
+  <i class="fa fa-pencil-square-o" aria-hidden="true" style="font-size: 5rem; color: #5dce7e;"></i>
+  <br>
+  <b style="font-size: 1.5rem;">Exam Segment</b>
+  <br><br>
   <div class="flex_box" id="container">
-
   </div>
-
+</div>
 </center>
 
 <script type="text/javascript">
@@ -44,7 +49,7 @@
   let ques_id;
 
   {%for cont in content %}
-    $('#container').append('<div class="card anime hover" id="' + '{{ cont.id }}' + '" onclick="redirect(this.id);"><div class="card-content"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
+    $('#container').append('<div class="card hover" id="' + '{{ cont.id }}' + '" onclick="redirect(this.id);"><div class="card-content"><div class="content has-text-centered"><h5>' + '{{cont.title}}' + '</h5></div></div></div>');
   {% endfor %}
 
 

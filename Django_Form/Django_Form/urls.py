@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('dashboard/<str:redirect_url>', views.admin_dashboard, name='dashboard'),
+    path('dashboard/result/<int:ques_id>', views.result, name='results'),
     path('questions/<int:ques_id>', views.questions, name='questions'),
     path('login', views.auth_login, name='login'),
 ]

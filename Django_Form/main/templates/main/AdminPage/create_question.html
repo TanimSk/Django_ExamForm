@@ -140,11 +140,14 @@
   let img_dict = {};
   let count_ques = 0;
   let count_img = 0;
+  let ans_csv = ['name', 'duration', 'marks']; //append 1,2,3
+  let ques_csv = [['questions', 'answer']];
 
   $('#save_btn').hide();
   document.getElementById("img_btn").disabled = true;
 
   function create() {
+    ans_csv.push(count_ques);
     count_ques++;
     count_img = 0;
     img_dict[count_ques - 1] = [];
@@ -231,15 +234,10 @@
       'images': img_dict
     };
 
-    let csv_field = [
-      ['name', 'duration', 'mark'],
-      ['Answers', '0']
-    ];
-
-    // console.log(json_ques);
+    let temp_array = [];
 
     let mcq = $('._mcq_').length;
-    let mcq_div = $('.mcq').length;
+    // let mcq_div = $('.mcq').length;
     let qa = $('._qa_').length;
 
 
@@ -274,8 +272,11 @@
     json_ques['duration'] = duration_h * 3600 + duration_m * 60; //in sec
 
     let time_select = $('#time_selection option:selected').val();
-    if (time_select == "1" && start_h < 12) {
+    if (time_select == "1" && start_h < 12) {    //PM
       start_h += 12;
+    }
+    else if (time_select=="0" && start_h == 12) {
+      start_h = 0;
     }
 
     let m = moment().tz("Asia/Dhaka");
@@ -292,21 +293,19 @@
 
     json_ques['starts'] = start_h * 3600 + start_m * 60;
 
-    csv_field[1].push(count_ques);
-
     for (count = 0; count < qa; count++) {
       json_ques.ques_qa[count] = $('._qa_:eq(' + count + ')').val();
-      csv_field[0].push(json_ques.ques_qa[count]);
+      temp_array.push(json_ques.ques_qa[count]);
       json_ques.qa_correct[count] = $('.answer_qa:eq(' + count + ')').val();
-      csv_field[1].push(json_ques.qa_correct[count]);
+      temp_array.push(json_ques.qa_correct[count]);
+      ques_csv.push(temp_array);
+      temp_array = [];
+
     }
 
     for (let count = 0; count < mcq; count++) {
       json_ques.ques_mcq[count] = $('._mcq_:eq(' + count + ')').val();
-      csv_field[0].push(json_ques.ques_mcq[count]);
-    }
-
-    for (count = 0; count < mcq_div; count++) {
+      temp_array.push(json_ques.ques_mcq[count]);
       let n_options = $('.mcq:eq(' + count + ') .radio_btn').length;
       json_ques.mcq[count] = [];
       json_ques.mcq_correct[count] = [];
@@ -319,16 +318,22 @@
           serial++;
         }
       }
-      csv_field[1].push(json_ques.mcq_correct[count].join());
+      temp_array.push(json_ques.mcq_correct[count].join());
+      ques_csv.push(temp_array);
+      temp_array = [];
     }
 
+      // csv_field[1].push(json_ques.mcq_correct[count].join());
+
     json_ques = JSON.stringify(json_ques);
-    csv_field = JSON.stringify(csv_field);
+    ans_csv = JSON.stringify(ans_csv);
+    ques_csv =  JSON.stringify(ques_csv);
     $.ajax({
       url: '', //self-calling
       data: {
         json_ques: json_ques,
-        csv_field: csv_field,
+        ans_csv: ans_csv,
+        ques_csv: ques_csv,
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
       },
       type: 'POST',

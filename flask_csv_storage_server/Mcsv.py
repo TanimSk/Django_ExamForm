@@ -3,12 +3,15 @@ import pandas as pd
 import os
 import json
 
-def write_rows(filename, rows):
+def write_file(filename, row, mode):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
-    rows = json.loads(rows)
+    row = json.loads(row)
     with open(filename, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerows(rows)
+        if mode == 'q':
+            csvwriter.writerows(row)
+        else:
+            csvwriter.writerow(row)
 
 
 def write_row(filename, row):
@@ -16,9 +19,11 @@ def write_row(filename, row):
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(row)
 
-def get_csv(filename):
+def get_csv(filename, mode):
     a = pd.read_csv(filename)
-    a.rename( columns={'Unnamed: 0':'new column name'}, inplace=True )
+    if mode == 1:
+        return [a.to_html(), a['marks'].max(), a['marks'].mean()]
+
     return a.to_html()
 
 def remove_csv(filename):

@@ -16,19 +16,25 @@ def save():
         if mode == 'w':
             ques_json = request.form["ques_json"]
             ans_json = request.form["ans_json"]
-            Mcsv.write_row(filename, evaluate(ques_json, ans_json))
+            Mcsv.write_row("C_answers/"+filename, evaluate(ques_json, ans_json))
             return 'OK'
 
         elif mode == 'wh':
-            row = request.form["row"]
-            Mcsv.write_rows(filename, row)
+            ques_csv = request.form["ques_csv"]
+            ans_csv = request.form["ans_csv"]
+            file = "C_questions/"+filename
+            Mcsv.write_file(file, ques_csv, 'q')
+            file = "C_answers/"+filename
+            Mcsv.write_file(file, ans_csv, 'a')
+
             return 'OK'
 
         elif mode == 'r':
-            return str(Mcsv.get_csv(filename))
+            return {'question': str(Mcsv.get_csv("C_questions/"+filename, 0)), 'answer': str(Mcsv.get_csv("C_answers/"+filename, 1))}
 
         elif mode == 'd':
-            Mcsv.remove_csv(filename)
+            Mcsv.remove_csv("C_questions/"+filename)
+            Mcsv.remove_csv("C_answers/"+filename)
             return 'OK'
         else:
             return 'WRONG MODE'

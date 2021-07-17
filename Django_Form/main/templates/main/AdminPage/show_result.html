@@ -1,0 +1,33 @@
+{% extends "main/base/index.html" %}
+{% block content %}
+
+<title>Result</title>
+
+<center>
+  <div class="table-container">
+    {{ question | safe}}
+    <br><br>
+    {{ highest_marks }}
+    <br>
+    {{ average_marks }}
+    <br>
+    {{ answer | safe }}
+  </div>
+</center>
+
+<script type="text/javascript">
+  var element = document.getElementsByTagName('table')[0];
+  element.classList.add("table");
+  element.classList.add("is-hoverable");
+  element.classList.add("is-bordered");
+  element.classList.add("is-striped");
+
+  element = document.getElementsByTagName('table')[1];
+  element.classList.add("table");
+  element.classList.add("is-hoverable");
+  element.classList.add("is-bordered");
+  element.classList.add("is-striped");
+
+</script>
+
+{% endblock %}

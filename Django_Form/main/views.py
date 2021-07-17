@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
 from .models import Question, Student
+from django.http import HttpResponse
 from .delta_time import Delta_time
 from . import Cdate
 import requests
@@ -28,7 +28,7 @@ def questions(req, ques_id):
             number = req.POST.get('number')
             response_ans = req.POST.get('response_ans')
             entry = Student(name=name, phone_number=number, email=email, ques_id=ques_id)
-            requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY', 'ques_json': json.dumps(content), 'ans_json': response_ans})
+            requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'w', 'filename': f"{ques_id}.csv", 'key': 'KEY', 'ques_json': json.dumps(content), 'ans_json': response_ans})
             entry.save()
             return HttpResponse(json.dumps({'done': True}), content_type='application/json')
 
@@ -47,10 +47,12 @@ def admin_dashboard(req, redirect_url):
     if req.method == 'POST':
         json_ques = json.loads(req.POST.get('json_ques'))
         json_ques['date'] = Cdate.this_date()
-        csv_field = req.POST.get('csv_field')
+        ans_csv = req.POST.get('ans_csv')
+        ques_csv = req.POST.get('ques_csv')
+        print(ans_csv, ques_csv)
         entry = Question(json_ques=json_ques, title=json_ques['title'])
         entry.save()
-        requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'wh', 'filename': f"chondro_bindu/{entry.id}.csv", 'row': csv_field, 'key': 'KEY'})
+        requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'wh', 'filename': f"{entry.id}.csv", 'ans_csv': ans_csv, 'ques_csv': ques_csv, 'key': 'KEY'})
         return HttpResponse(json.dumps({'done': True}), content_type='application/json')
 
     if redirect_url == 'create':
@@ -66,11 +68,13 @@ def admin_dashboard(req, redirect_url):
     else:
         return HttpResponse("<h1>ERROR!</h1>")
 
+
 @login_required(login_url='login')
 def result(req, ques_id):
-    r = requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'r', 'filename': f"chondro_bindu/{ques_id}.csv", 'key': 'KEY'})
+    table = json.loads(requests.post('http://127.0.0.1:5000/csv_manager', data={'mode': 'r', 'filename': f"{ques_id}.csv", 'key': 'KEY'}).text)
+    print(type(table['answer']))
+    return render(req, "main/AdminPage/show_result.html", {'question': table['question'], 'answer': table['answer'][0], 'highest_marks': table['answer'][1], 'average_marks': table['answer'][2]})
 
-    return HttpResponse(r)
 
 
 def auth_login(req):
